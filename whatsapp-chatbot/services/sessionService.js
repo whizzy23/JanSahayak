@@ -1,7 +1,7 @@
 const sessions = {};
 
 const getSession = (userId) => {
-  if (!sessions[userId]) sessions[userId] = { step: 0 };
+  if (!sessions[userId]) sessions[userId] = {};
   return sessions[userId];
 };
 

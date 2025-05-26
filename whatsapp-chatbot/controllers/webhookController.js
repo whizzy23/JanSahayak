@@ -1,41 +1,100 @@
-const Issue = require('../models/Issue');
-const { getSession, clearSession } = require('../services/sessionService');
+const Issue = require("../models/Issue");
+const Counter = require("../models/Counter");
+const { getSession, clearSession } = require("../services/sessionService");
 
-const deptMap = {
-  '1': 'Roadways',
-  '2': 'Electricity',
-  '3': 'Water',
-  '4': 'Gas',
+// ticket ID generation function
+async function generateTicketId(cityName, deptCode) {
+  const cityCode = cityName
+    .replace(/[^a-zA-Z]/g, "")
+    .substring(0, 3)
+    .toUpperCase()
+    .padEnd(3, "X");
+  const key = `${cityCode}-${deptCode}`;
+  const counter = await Counter.findOneAndUpdate(
+    { _id: key },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  return `${key}-${String(counter.seq).padStart(3, "0")}`;
+}
+
+// function to create department code
+const makeDeptCode = (dept) => {
+  return dept.replace(/\s+/g, "").slice(0, 2).toUpperCase();
 };
 
-// step IDs
+// function to send reply in TwiML format
+function sendReply(res, msg) {
+  res.set("Content-Type", "text/xml");
+  res.send(`<Response><Message>${msg}</Message></Response>`);
+}
+
+const deptMap = {
+  1: "Water",
+  2: "Electricity",
+  3: "Roads",
+  4: "Sanitation",
+  5: "Garbage Collection",
+  6: "Street Lights",
+  7: "Drainage",
+  8: "Public Toilets",
+  9: "Other",
+};
+
 const STEPS = {
-  START:       0,
-  DEPT:        1,
-  DESCRIPTION: 2,
-  PHOTO_OPT:   3,
-  PHOTO:       4,
-  COMPLETE:    5
+  START: 1,
+  DEPT: 2,
+  ASK_CITY: 3,
+  ASK_STREETDETAILS: 4,
+  ASK_LANDMARK: 5,
+  PINCODE: 6,
+  DESCRIPTION: 7,
+  PHOTO_OPT: 8,
+  PHOTO: 9,
+  COMPLETE: 10,
 };
 
 exports.handleIncoming = async (req, res) => {
-  const from     = req.body.From;
-  const text     = (req.body.Body || '').trim();
-  const media    = parseInt(req.body.NumMedia, 10);
-  const mediaUrl = media > 0 ? req.body.MediaUrl0 : null;
+  const from = req.body.From;
+  const textRaw = (req.body.Body || "").trim();
+  const text = textRaw.toUpperCase();
+  const mediaQty = parseInt(req.body.NumMedia, 10);
+  const mediaUrl = mediaQty > 0 ? req.body.MediaUrl0 : null;
 
   const session = getSession(from);
 
-  // handle global commands
-  if (/^RESET$/i.test(text)) {
+  // handling TRACK command
+  const trackMatch = text.match(/^TRACK\s+([A-Z]{3}-[A-Z]{2}-\d{3})$/);
+  if (trackMatch) {
+    const ticketId = trackMatch[1];
+    const issue = await Issue.findOne({ ticketId });
+    const reply = issue
+      ? `Status of ${ticketId}: ${issue.status || "Under Review"}.`
+      : `No complaint found with ID ${ticketId}.`;
+    return sendReply(res, reply);
+  }
+
+  if (session.step == null) {
+    session.step = STEPS.START;
+    return sendReply(
+      res,
+      `Thank you for contacting Municipal System.\n` +
+        `Type *REPORT* to file a new issue, or *TRACK <Issue-ID>* to check an existing one.`
+    );
+  }
+
+  if (text === "RESET") {
     clearSession(from);
     session.step = STEPS.START;
+    return sendReply(
+      res,
+      `Type *REPORT* to file a new issue, or *TRACK <Issue-ID>* to check status.`
+    );
   }
-  if (/^BACK$/i.test(text) && session.history && session.history.length) {
-    // pop last step and go back
+
+  if (text === "BACK" && session.history?.length > 1) {
     session.history.pop();
-    const prev = session.history.pop() ?? STEPS.START;
-    session.step = prev;
+    session.step = session.history.pop();
   }
 
   // record this step in history (unless resetting)
@@ -48,105 +107,142 @@ exports.handleIncoming = async (req, res) => {
 
   switch (session.step) {
     case STEPS.START:
-      reply = [
-        'Hi! Thanks for reporting an issue.',
-        'Type **RESET** at any time to start over, or **BACK** to go to the previous question.',
-        '',
-        'Please select the department of concern:',
-        '1. Roadways',
-        '2. Electricity',
-        '3. Water',
-        '4. Gas'
-      ].join('\n');
-      session.step = STEPS.DEPT;
-      break;
+      if (text === "REPORT") {
+        session.step = STEPS.DEPT;
+        return sendReply(
+          res,
+          "Great! Please select the type of issue:\n" +
+            Object.entries(deptMap)
+              .map(([k, v]) => `${k}. ${v}`)
+              .join("\n")
+        );
+      } else {
+        return sendReply(
+          res,
+          `Type *REPORT* to file an issue, or *TRACK <Issue-ID>* to check status.`
+        );
+      }
 
     case STEPS.DEPT:
-      if (deptMap[text]) {
-        session.department = deptMap[text];
-        session.step = STEPS.DESCRIPTION;
-        reply = `You chose *${session.department}*.\n\nPlease describe your issue in detail.`;
+      if (deptMap[textRaw]) {
+        session.department = deptMap[textRaw];
+        session.step = STEPS.ASK_CITY;
+        reply = "Which city is this in?";
       } else {
-        reply = [
-          'Invalid choice.',
-          'Select department by typing 1, 2, 3 or 4:',
-          '1. Roadways',
-          '2. Electricity',
-          '3. Water',
-          '4. Gas'
-        ].join('\n');
+        reply = `Sorry, that’s not valid. Please enter a number from 1 to 9 :\n${Object.entries(
+          deptMap
+        )
+          .map(([k, v]) => `${k}. ${v}`)
+          .join("\n")}`;
+      }
+      break;
+
+    case STEPS.ASK_CITY:
+      if (textRaw.length < 3) {
+        reply = "Please enter a valid city name (at least 3 characters).";
+      } else {
+        session.location = { city: textRaw };
+        session.step = STEPS.ASK_STREETDETAILS;
+        reply = "Street number and name, or reply SKIP to skip.";
+      }
+      break;
+
+    case STEPS.ASK_STREETDETAILS:
+      if (text === "SKIP" || textRaw.length <= 50) {
+        session.location.streetDetails = text === "SKIP" ? "" : textRaw;
+        session.step = STEPS.ASK_LANDMARK;
+        reply = "Please specify a landmark (e.g., Near Main Road).";
+      } else {
+        reply = "Too long—please send just the number and street, or SKIP.";
+      }
+      break;
+
+    case STEPS.ASK_LANDMARK:
+      if (textRaw.length < 3) {
+        reply = "Please enter a valid landmark (at least 3 characters).";
+      } else {
+        session.location.landmark = textRaw;
+        session.step = STEPS.PINCODE;
+        reply = "Please share Pin Code.";
+      }
+      break;
+
+    case STEPS.PINCODE:
+      if (/^\d{6}$/.test(textRaw)) {
+        session.location.pincode = textRaw;
+        session.step = STEPS.DESCRIPTION;
+        reply = "Please describe your issue briefly.";
+      } else {
+        reply = "That doesn’t look right. Enter a 6-digit PIN code.";
       }
       break;
 
     case STEPS.DESCRIPTION:
-      if (text.length < 5) {
-        reply = 'Description too short. Please describe your issue in at least 5 characters.';
+      if (textRaw.length < 5) {
+        reply = "Please describe your issue in at least 5 characters.";
       } else {
-        session.description = text;
+        session.description = textRaw;
         session.step = STEPS.PHOTO_OPT;
-        reply = [
-          'Would you like to share a photo?',
-          '1. Yes',
-          '2. No'
-        ].join('\n');
+        reply = "Would you like to add a photo? Reply 1 for Yes, 2 for No.";
       }
       break;
 
     case STEPS.PHOTO_OPT:
-      if (text === '1') {
+      if (text === "1") {
         session.step = STEPS.PHOTO;
-        reply = 'Please send the photo now.';
-      } else if (text === '2') {
-        // save without photo
-        try {
-          const doc = await Issue.create({
-            phone:       from,
-            department:  session.department,
-            description: session.description
-          });
-          console.log('Saved issue:', doc._id);
-        } catch (err) {
-          console.error('DB save error:', err);
-          reply = 'Oops, something went wrong saving your issue. Please try again later.';
-          break;
-        }
+        reply = "Please send the photo now.";
+      } else if (text === "2") {
+        const deptCode = makeDeptCode(session.department);
+        const ticket = await generateTicketId(session.location.city, deptCode);
+        session.lastTicket = ticket;
+        await Issue.create({
+          phone: from,
+          department: session.department,
+          deptCode,
+          location: session.location,
+          description: session.description,
+          ticketId: ticket,
+        });
         session.step = STEPS.COMPLETE;
-        reply = 'Your issue has been recorded. Thank you!';
-        clearSession(from);
+        reply = `Registered!\n🎫 Ticket ID: ${ticket}\nReply TRACK ${ticket} to check status.`;
       } else {
-        reply = 'Reply with **1** for Yes or **2** for No.';
+        reply = "Please reply 1 for Yes or 2 for No.";
       }
       break;
 
     case STEPS.PHOTO:
       if (mediaUrl) {
-        try {
-          const doc = await Issue.create({
-            phone:       from,
-            department:  session.department,
-            description: session.description,
-            imageUrl:    mediaUrl
-          });
-          console.log('Saved issue with photo:', doc._id);
-        } catch (err) {
-          console.error('DB save error:', err);
-          reply = 'Oops, couldn’t save your photo. Try again later.';
-          break;
-        }
+        const deptCode = makeDeptCode(session.department);
+        const ticket = await generateTicketId(session.location.city, deptCode);
+        session.lastTicket = ticket;
+        await Issue.create({
+          phone: from,
+          department: session.department,
+          deptCode,
+          location: session.location,
+          description: session.description,
+          imageUrl: mediaUrl,
+          ticketId: ticket,
+        });
         session.step = STEPS.COMPLETE;
-        reply = 'Your issue (with photo) has been recorded. Thank you!';
-        clearSession(from);
+        reply = `Registered with photo!\n🎫 Ticket ID: ${ticket}\nReply TRACK ${ticket} to check status.`;
       } else {
-        reply = 'No photo detected. Please send an image now, or type **BACK** to skip.';
+        reply = "No photo detected. Send an image or reply BACK.";
       }
       break;
 
+    case STEPS.COMPLETE:
+      return sendReply(
+        res,
+        `You’ve already filed your complaint (ID: ${session.lastTicket}).\n` +
+          `Reply TRACK ${session.lastTicket} to check status, or RESET to file a new complaint.`
+      );
+
     default:
-      reply = 'Something went wrong—type **RESET** to start over.';
       clearSession(from);
+      reply =
+        "Something went wrong. Type *REPORT* to start a new issue or *TRACK <ID>* to check status.";
   }
 
-  // Send TwiML response
-  res.set('Content-Type', 'text/xml');
-  res.send(`<Response><Message>${reply}</Message></Response>`);
+  sendReply(res, reply);
 };
