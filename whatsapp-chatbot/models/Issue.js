@@ -14,6 +14,7 @@ const issueSchema = new mongoose.Schema({
   imageUrl:    { type: String, default: null },
   ticketId:    { type: String, required: true, unique: true },
   status:      { type: String, default: "Under Review" },
+  urgency:     { type: String, enum: ['High', 'Medium', 'Low'], default: 'Low' },
   timestamp:   { type: Date, default: Date.now }
 });
 

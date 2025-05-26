@@ -1,6 +1,7 @@
 const Issue = require("../models/Issue");
 const Counter = require("../models/Counter");
 const { getSession, clearSession } = require("../services/sessionService");
+const { classifyUrgency } = require("../services/urgencyService");
 
 // ticket ID generation function
 async function generateTicketId(cityName, deptCode) {
@@ -129,7 +130,7 @@ exports.handleIncoming = async (req, res) => {
         session.step = STEPS.ASK_CITY;
         reply = "Which city is this in?";
       } else {
-        reply = `Sorry, that’s not valid. Please enter a number from 1 to 9 :\n${Object.entries(
+        reply = `Sorry, that's not valid. Please enter a number from 1 to 9 :\n${Object.entries(
           deptMap
         )
           .map(([k, v]) => `${k}. ${v}`)
@@ -173,7 +174,7 @@ exports.handleIncoming = async (req, res) => {
         session.step = STEPS.DESCRIPTION;
         reply = "Please describe your issue briefly.";
       } else {
-        reply = "That doesn’t look right. Enter a 6-digit PIN code.";
+        reply = "That doesn't look right. Enter a 6-digit PIN code.";
       }
       break;
 
@@ -195,6 +196,7 @@ exports.handleIncoming = async (req, res) => {
         const deptCode = makeDeptCode(session.department);
         const ticket = await generateTicketId(session.location.city, deptCode);
         session.lastTicket = ticket;
+        const urgency = await classifyUrgency(session.description);
         await Issue.create({
           phone: from,
           department: session.department,
@@ -202,9 +204,10 @@ exports.handleIncoming = async (req, res) => {
           location: session.location,
           description: session.description,
           ticketId: ticket,
+          urgency
         });
         session.step = STEPS.COMPLETE;
-        reply = `Registered!\n🎫 Ticket ID: ${ticket}\nReply TRACK ${ticket} to check status.`;
+        reply = `Registered!\n🎫 Ticket ID: ${ticket}\nUrgency: ${urgency}\nReply TRACK ${ticket} to check status.`;
       } else {
         reply = "Please reply 1 for Yes or 2 for No.";
       }
@@ -215,6 +218,7 @@ exports.handleIncoming = async (req, res) => {
         const deptCode = makeDeptCode(session.department);
         const ticket = await generateTicketId(session.location.city, deptCode);
         session.lastTicket = ticket;
+        const urgency = await classifyUrgency(session.description);
         await Issue.create({
           phone: from,
           department: session.department,
@@ -223,9 +227,10 @@ exports.handleIncoming = async (req, res) => {
           description: session.description,
           imageUrl: mediaUrl,
           ticketId: ticket,
+          urgency
         });
         session.step = STEPS.COMPLETE;
-        reply = `Registered with photo!\n🎫 Ticket ID: ${ticket}\nReply TRACK ${ticket} to check status.`;
+        reply = `Registered with photo!\n🎫 Ticket ID: ${ticket}\nUrgency: ${urgency}\nReply TRACK ${ticket} to check status.`;
       } else {
         reply = "No photo detected. Send an image or reply BACK.";
       }
@@ -234,7 +239,7 @@ exports.handleIncoming = async (req, res) => {
     case STEPS.COMPLETE:
       return sendReply(
         res,
-        `You’ve already filed your complaint (ID: ${session.lastTicket}).\n` +
+        `You've already filed your complaint (ID: ${session.lastTicket}).\n` +
           `Reply TRACK ${session.lastTicket} to check status, or RESET to file a new complaint.`
       );
 
