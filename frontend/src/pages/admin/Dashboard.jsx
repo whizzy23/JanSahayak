@@ -1,5 +1,4 @@
-import PieChart from '../../compomnents/PieChart';
-import AISuggestions from '../../compomnents/AISuggestions';
+import PieChart from '../../components/PieChart';
 
 export default function Dashboard() {
   const mockData = [
@@ -23,8 +22,8 @@ export default function Dashboard() {
         <StatCard title="Resolved" value="70" color="green" icon="✅" />
       </section>
 
-      {/* Charts and AI Suggestions */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Charts */}
+      <section className="grid grid-cols-1 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 ease-in-out">
           <h3 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
             Issues by Department
@@ -32,12 +31,6 @@ export default function Dashboard() {
           <PieChart data={mockData} />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-300 ease-in-out">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
-            AI Suggestions
-          </h3>
-          <AISuggestions />
-        </div>
       </section>
     </div>
   );

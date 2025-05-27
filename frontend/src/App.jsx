@@ -1,15 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './utils/auth.jsx';
-import Navbar from './compomnents/Navbar.jsx';
-import Footer from './compomnents/Footer.jsx';
-import ProtectedRoute from './compomnents/ProtectedRoute.jsx';
+import { AuthProvider, useAuth } from './utils/auth';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/auth/Login';
 import Logout from './pages/auth/Logout';
 import Dashboard from './pages/admin/Dashboard';
 import Issues from './pages/admin/Issues';
 import Employees from './pages/admin/Employees';
 import Departments from './pages/admin/Departments';
-import Settings from './pages/admin/Settings';
 import EmployeeIssues from './pages/employee/Issues';
 import Profile from './pages/employee/Profile';
 import NotFound from './pages/NotFound';
@@ -78,14 +77,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <Departments />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/settings"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <Settings />
                   </ProtectedRoute>
                 }
               />
