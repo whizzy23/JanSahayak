@@ -1,5 +1,7 @@
 require('dotenv').config()
+console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Set' : 'Not set')
 const issueRoutes = require('./routes/issues')
+const authRoutes = require('./routes/auth')
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
@@ -32,3 +34,6 @@ app.get('/api',(req,res) => {
 
 // issues routes
 app.use('/api/issues', issueRoutes);
+
+// auth routes
+app.use('/api/auth', authRoutes);

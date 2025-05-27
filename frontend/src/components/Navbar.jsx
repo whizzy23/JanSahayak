@@ -1,120 +1,74 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../utils/auth.jsx';
-import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export default function Navbar() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
-
+const Navbar = ({ onLogout, userRole }) => {
   return (
     <nav className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <h1 className="text-2xl font-bold tracking-tight">JanSahayak</h1>
+          <div className="flex items-center">
+            <Link to="/" className="text-2xl font-bold tracking-tight">
+              JanSahayak
+            </Link>
+          </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button onClick={toggleMenu} className="focus:outline-none">
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+          <div className="flex items-center space-x-4">
+            {userRole === 'admin' && (
+              <>
+                <Link
+                  to="/admin/dashboard"
+                  className="hover:bg-blue-700 px-3 py-2 rounded transition"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/admin/issues"
+                  className="hover:bg-blue-700 px-3 py-2 rounded transition"
+                >
+                  Issues
+                </Link>
+                <Link
+                  to="/admin/employees"
+                  className="hover:bg-blue-700 px-3 py-2 rounded transition"
+                >
+                  Employees
+                </Link>
+              </>
+            )}
+
+            {userRole === 'employee' && (
+              <>
+                <Link
+                  to="/employee/dashboard"
+                  className="hover:bg-blue-700 px-3 py-2 rounded transition"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/employee/issues"
+                  className="hover:bg-blue-700 px-3 py-2 rounded transition"
+                >
+                  My Issues
+                </Link>
+                <Link
+                  to="/employee/profile"
+                  className="hover:bg-blue-700 px-3 py-2 rounded transition"
+                >
+                  Profile
+                </Link>
+              </>
+            )}
+
+            <button
+              onClick={onLogout}
+              className="hover:bg-blue-700 px-4 py-2 rounded transition"
+            >
+              Logout
             </button>
           </div>
-
-          {/* Desktop Links */}
-          <div className="hidden md:flex space-x-6 items-center">
-            {user ? (
-              <>
-                {user.role === 'admin' && (
-                  <>
-                    <NavLink to="/admin/dashboard" label="Dashboard" />
-                    <NavLink to="/admin/issues" label="Issues" />
-                    <NavLink to="/admin/employees" label="Employees" />
-                  </>
-                )}
-                {user.role === 'employee' && (
-                  <>
-                    <NavLink to="/employee/issues" label="My Issues" />
-                    <NavLink to="/employee/profile" label="Profile" />
-                  </>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="hover:bg-blue-700 px-4 py-2 rounded transition"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <NavLink to="/login" label="Login" />
-            )}
-          </div>
         </div>
-
-        {/* Mobile Links */}
-        {isOpen && (
-          <div className="md:hidden mt-2 space-y-2">
-            {user ? (
-              <>
-                {user.role === 'admin' && (
-                  <>
-                    <MobileLink to="/admin/dashboard" label="Dashboard" />
-                    <MobileLink to="/admin/issues" label="Issues" />
-                    <MobileLink to="/admin/employees" label="Employees" />
-                  </>
-                )}
-                {user.role === 'employee' && (
-                  <>
-                    <MobileLink to="/employee/issues" label="My Issues" />
-                    <MobileLink to="/employee/profile" label="Profile" />
-                  </>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 hover:bg-blue-700 rounded"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <MobileLink to="/login" label="Login" />
-            )}
-          </div>
-        )}
       </div>
     </nav>
   );
-}
+};
 
-// Reusable desktop nav link
-function NavLink({ to, label }) {
-  return (
-    <Link
-      to={to}
-      className="hover:bg-blue-700 px-4 py-2 rounded transition"
-    >
-      {label}
-    </Link>
-  );
-}
-
-// Reusable mobile nav link
-function MobileLink({ to, label }) {
-  return (
-    <Link
-      to={to}
-      className="block px-4 py-2 hover:bg-blue-700 rounded"
-    >
-      {label}
-    </Link>
-  );
-}
+export default Navbar;

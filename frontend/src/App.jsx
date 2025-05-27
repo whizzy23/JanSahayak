@@ -1,103 +1,121 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './utils/auth';
+import { useState, useEffect } from 'react';
+import Auth from './pages/Auth';
+import ProtectedRoute from './components/ProtectedRoute';
+import { authService } from './services/authService';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/auth/Login';
-import Logout from './pages/auth/Logout';
 import Dashboard from './pages/admin/Dashboard';
 import Issues from './pages/admin/Issues';
 import Employees from './pages/admin/Employees';
 import EmployeeIssues from './pages/employee/Issues';
 import Profile from './pages/employee/Profile';
-import NotFound from './pages/NotFound';
 
 function App() {
-  // Component to handle root route redirection
-  const RootRedirect = () => {
-    const { user } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
-    if (!user) {
-      return <Navigate to="/login" />;
+  useEffect(() => {
+    const authenticated = authService.isAuthenticated();
+    setIsAuthenticated(authenticated);
+    if (authenticated) {
+      setUserRole(authService.getRole());
     }
+  }, []);
 
-    if (user.role === 'admin') {
-      return <Navigate to="/admin/dashboard" />;
-    }
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true);
+    setUserRole(authService.getRole());
+  };
 
-    if (user.role === 'employee') {
-      return <Navigate to="/employee/issues" />;
-    }
-
-    return <Navigate to="/login" />;
+  const handleLogout = () => {
+    authService.logout();
+    setIsAuthenticated(false);
+    setUserRole(null);
   };
 
   return (
-    <AuthProvider>
-      <Router>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-grow">
-            <Routes>
-              {/* Root Route */}
-              <Route path="/" element={<RootRedirect />} />
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        {isAuthenticated && (
+          <Navbar onLogout={handleLogout} userRole={userRole} />
+        )}
+        <main className="flex-grow">
+          <Routes>
+            <Route
+              path="/auth"
+              element={
+                isAuthenticated ? (
+                  <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/employee/issues'} replace />
+                ) : (
+                  <Auth onAuthSuccess={handleAuthSuccess} />
+                )
+              }
+            />
+            
+            {/* Admin Routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  {userRole === 'admin' ? <Dashboard /> : <Navigate to="/auth" replace />}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/issues"
+              element={
+                <ProtectedRoute>
+                  {userRole === 'admin' ? <Issues /> : <Navigate to="/auth" replace />}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/employees"
+              element={
+                <ProtectedRoute>
+                  {userRole === 'admin' ? <Employees /> : <Navigate to="/auth" replace />}
+                </ProtectedRoute>
+              }
+            />
 
-              {/* Common Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/logout" element={<Logout />} />
+            {/* Employee Routes */}
+            <Route
+              path="/employee/issues"
+              element={
+                <ProtectedRoute>
+                  {userRole === 'employee' ? <EmployeeIssues /> : <Navigate to="/auth" replace />}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee/profile"
+              element={
+                <ProtectedRoute>
+                  {userRole === 'employee' ? <Profile /> : <Navigate to="/auth" replace />}
+                </ProtectedRoute>
+              }
+            />
 
-              {/* Admin Routes */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/issues"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <Issues />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/employees"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <Employees />
-                  </ProtectedRoute>
-                }
-              />
+            {/* Root Route */}
+            <Route
+              path="/"
+              element={
+                isAuthenticated ? (
+                  <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/employee/issues'} replace />
+                ) : (
+                  <Navigate to="/auth" replace />
+                )
+              }
+            />
 
-              {/* Employee Routes */}
-              <Route
-                path="/employee/issues"
-                element={
-                  <ProtectedRoute allowedRoles={['employee']}>
-                    <EmployeeIssues />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/employee/profile"
-                element={
-                  <ProtectedRoute allowedRoles={['employee']}>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Fallback Route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </AuthProvider>
+            {/* Fallback Route */}
+            <Route path="*" element={<Navigate to="/auth" replace />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
