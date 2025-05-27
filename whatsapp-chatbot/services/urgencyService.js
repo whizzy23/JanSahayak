@@ -10,7 +10,7 @@ async function classifyUrgency(text) {
     } catch (error) {
         console.error('Error calling spaCy service:', error);
         // Fallback to simple keyword matching if spaCy service is unavailable
-        // return simpleClassifyUrgency(text);
+        return simpleClassifyUrgency(text);
     }
 }
 
