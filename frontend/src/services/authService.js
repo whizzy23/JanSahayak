@@ -1,44 +1,34 @@
-const API_URL = 'http://localhost:4000/api';
+import api from '../api/axiosInstance';
 
 export const authService = {
   async signup(email, password, role) {
-    const response = await fetch(`${API_URL}/auth/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password, role }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Signup failed');
+    try {
+      const response = await api.post('/auth/signup', { email, password, role });
+      const { token, role: userRole } = response.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', userRole);
+
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.error || 'Signup failed';
+      throw new Error(message);
     }
-    
-    const data = await response.json();
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('role', data.role);
-    return data;
   },
 
   async login(email, password) {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, role: userRole } = response.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', userRole);
+
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.error || 'Login failed';
+      throw new Error(message);
     }
-    
-    const data = await response.json();
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('role', data.role);
-    return data;
   },
 
   logout() {
@@ -57,4 +47,4 @@ export const authService = {
   isAuthenticated() {
     return !!this.getToken();
   }
-}; 
+};

@@ -1,7 +1,10 @@
+const twilio = require('twilio');
 const Issue = require("../models/Issue");
 const Counter = require("../models/Counter");
 const { getSession, clearSession } = require("../services/sessionService");
 const { classifyUrgency } = require("../services/urgencyService");
+
+const MessagingResponse = twilio.twiml.MessagingResponse;
 
 // ticket ID generation function
 async function generateTicketId(cityName, deptCode) {
@@ -26,8 +29,10 @@ const makeDeptCode = (dept) => {
 
 // function to send reply in TwiML format
 function sendReply(res, msg) {
+  const twiml = new MessagingResponse();
+  twiml.message(msg);
   res.set("Content-Type", "text/xml");
-  res.send(`<Response><Message>${msg}</Message></Response>`);
+  res.send(twiml.toString());
 }
 
 const deptMap = {
@@ -230,7 +235,7 @@ exports.handleIncoming = async (req, res) => {
           urgency
         });
         session.step = STEPS.COMPLETE;
-        reply = `Registered with photo!\n🎫 Ticket ID: ${ticket}\nUrgency: ${urgency}\nReply TRACK ${ticket} to check status.`;
+        reply = `Registered with photo!\n🎫 Ticket ID: ${ticket}\nReply TRACK ${ticket} to check status.`;
       } else {
         reply = "No photo detected. Send an image or reply BACK.";
       }
