@@ -13,7 +13,7 @@ const issueSchema = new mongoose.Schema({
   description: { type: String, required: true },
   imageUrl:    { type: String, default: null },
   ticketId:    { type: String, required: true, unique: true },
-  status:      { type: String, default: "Under Review" },
+  status:      { type: String, default: "Pending" },
   urgency:     { type: String, enum: ['High', 'Medium', 'Low'], default: 'Low' },
   assignedTo:  { type: String, default: null },
   resolution:  { type: String, default: null },
