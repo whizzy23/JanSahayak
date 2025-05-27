@@ -8,7 +8,6 @@ import Logout from './pages/auth/Logout';
 import Dashboard from './pages/admin/Dashboard';
 import Issues from './pages/admin/Issues';
 import Employees from './pages/admin/Employees';
-import Departments from './pages/admin/Departments';
 import EmployeeIssues from './pages/employee/Issues';
 import Profile from './pages/employee/Profile';
 import NotFound from './pages/NotFound';
@@ -69,14 +68,6 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <Employees />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/departments"
-                element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <Departments />
                   </ProtectedRoute>
                 }
               />

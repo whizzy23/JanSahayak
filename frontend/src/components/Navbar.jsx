@@ -39,7 +39,6 @@ export default function Navbar() {
                     <NavLink to="/admin/dashboard" label="Dashboard" />
                     <NavLink to="/admin/issues" label="Issues" />
                     <NavLink to="/admin/employees" label="Employees" />
-                    <NavLink to="/admin/departments" label="Departments" />
                   </>
                 )}
                 {user.role === 'employee' && (
@@ -71,7 +70,6 @@ export default function Navbar() {
                     <MobileLink to="/admin/dashboard" label="Dashboard" />
                     <MobileLink to="/admin/issues" label="Issues" />
                     <MobileLink to="/admin/employees" label="Employees" />
-                    <MobileLink to="/admin/departments" label="Departments" />
                   </>
                 )}
                 {user.role === 'employee' && (
