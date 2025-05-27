@@ -43,7 +43,11 @@ HIGH_URGENCY_PHRASES = [
 
     # Other
     "fire incident", "explosion", "animal attack reported", "serious public safety threat",
-    "gas leak from nearby shop", "collapsed wall on footpath"
+    "gas leak from nearby shop", "collapsed wall on footpath", "building about to collapse",
+    "major chemical smell in area", "fight breaking out in public", "gunshot heard nearby",
+    "gas cylinder blast", "hazardous chemical spill", "ceiling collapse", "tree fell on someone",
+    "roof collapsed", "aggressive mob gathering", "people electrocuted", "unattended body on road",
+    "fatal accident on main road", "shooting incident", "bridge crack observed"
 ]
 
 MEDIUM_URGENCY_PHRASES = [
@@ -81,7 +85,12 @@ MEDIUM_URGENCY_PHRASES = [
 
     # Other
     "unauthorized construction", "encroachment on government land",
-    "street vendor blocking passage", "abandoned vehicle", "noise pollution late night"
+    "street vendor blocking passage", "abandoned vehicle", "noise pollution late night",
+    "cow or buffalo blocking traffic", "temporary tent obstructing path",
+    "construction material on footpath", "drunk person creating scene", "illegal parking causing jam",
+    "open borewell", "construction without permit", "children playing on highway",
+    "beggars harassing public", "animal carcass on road", "temporary stage blocking main road",
+    "small fire near garbage", "rickshaw obstruction at junction"
 ]
 
 LOW_URGENCY_PHRASES = [
@@ -119,9 +128,12 @@ LOW_URGENCY_PHRASES = [
 
     # Other
     "street artist causing crowd", "request for tree trimming",
-    "complaint about stray dogs", "dog poop in park", "poster litter on walls"
+    "complaint about stray dogs", "dog poop in park", "poster litter on walls",
+    "hawkers on footpath", "walls being used for urination", "idle vehicles parked long-term",
+    "community radio playing loudly", "posters defacing public property",
+    "need for dog sterilization", "street children loitering", "request for more traffic signs",
+    "temporary wires hanging", "request for community notice board", "street bench broken"
 ]
-
 
 # Create phrase matchers
 matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
