@@ -1,4 +1,5 @@
 import PieChart from '../../components/PieChart';
+import { FaChartBar, FaThumbtack, FaHourglassHalf, FaCheckCircle } from 'react-icons/fa';
 
 export default function Dashboard() {
   const mockData = [
@@ -15,11 +16,33 @@ export default function Dashboard() {
       </h2>
 
       {/* Statistics Overview */}
+      
+
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <StatCard title="Total Issues" value="150" color="blue" icon="📊" />
-        <StatCard title="Assigned" value="50" color="yellow" icon="📌" />
-        <StatCard title="Pending" value="30" color="red" icon="⏳" />
-        <StatCard title="Resolved" value="70" color="green" icon="✅" />
+      <StatCard
+        title="Total Issues"
+        value="150"
+        color="blue"
+        icon={<FaChartBar className="text-2xl text-blue-600" />}
+      />
+      <StatCard
+        title="Assigned"
+        value="50"
+        color="yellow"
+        icon={<FaThumbtack className="text-2xl text-yellow-500" />}
+      />
+      <StatCard
+        title="Pending"
+        value="30"
+        color="red"
+        icon={<FaHourglassHalf className="text-2xl text-red-500" />}
+      />
+      <StatCard
+        title="Resolved"
+        value="70"
+        color="green"
+        icon={<FaCheckCircle className="text-2xl text-green-600" />}
+      />
       </section>
 
       {/* Charts */}
