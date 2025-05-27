@@ -1,13 +1,32 @@
+import { useEffect, useState } from 'react';
+import { fetchIssueStats } from '../../services/issueService'
+import axios from 'axios';
 import PieChart from '../../components/PieChart';
 import { FaChartBar, FaThumbtack, FaHourglassHalf, FaCheckCircle } from 'react-icons/fa';
 
 export default function Dashboard() {
-  const mockData = [
-    { name: 'Water Supply', value: 25 },
-    { name: 'Road Repair', value: 20 },
-    { name: 'Electricity', value: 15 },
-    { name: 'Sanitation', value: 10 },
-  ];
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const getStats = async () => {
+      try {
+        const data = await fetchIssueStats();
+        setStats(data);
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+        setError('Something went wrong while fetching stats.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getStats();
+  }, []);
+
+  if (loading) return <p className="text-center text-gray-600">Loading stats...</p>;
+  if (error) return <p className="text-center text-red-600">{error}</p>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -21,25 +40,25 @@ export default function Dashboard() {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       <StatCard
         title="Total Issues"
-        value="150"
+        value={stats.total}
         color="blue"
         icon={<FaChartBar className="text-2xl text-blue-600" />}
       />
       <StatCard
         title="Assigned"
-        value="50"
+        value={stats.assigned}
         color="yellow"
         icon={<FaThumbtack className="text-2xl text-yellow-500" />}
       />
       <StatCard
         title="Pending"
-        value="30"
+        value={stats.pending}
         color="red"
         icon={<FaHourglassHalf className="text-2xl text-red-500" />}
       />
       <StatCard
         title="Resolved"
-        value="70"
+        value={stats.resolved}
         color="green"
         icon={<FaCheckCircle className="text-2xl text-green-600" />}
       />
@@ -51,7 +70,9 @@ export default function Dashboard() {
           <h3 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
             Issues by Department
           </h3>
-          <PieChart data={mockData} />
+          <PieChart
+            data={Object.entries(stats.byDepartment).map(([name, value]) => ({ name, value }))}
+          />
         </div>
 
       </section>

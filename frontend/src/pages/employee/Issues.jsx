@@ -6,7 +6,6 @@ export default function EmployeeIssues() {
       id: 1,
       title: 'Water Supply Issue',
       description: 'No water for 2 days',
-      aiSummary: 'Urgent water shortage',
       status: 'Assigned',
       dept: 'Water',
       location: { city: 'City A', streetDetails: '123 Main St', landmark: 'Near Park', pincode: '123456' },
@@ -32,7 +31,6 @@ export default function EmployeeIssues() {
                 <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Description</th>
-                <th className="px-4 py-3">AI Summary</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
@@ -43,7 +41,6 @@ export default function EmployeeIssues() {
                   <td className="px-4 py-3">{issue.id}</td>
                   <td className="px-4 py-3 font-medium">{issue.title}</td>
                   <td className="px-4 py-3">{issue.description}</td>
-                  <td className="px-4 py-3 text-blue-600">{issue.aiSummary}</td>
                   <td className="px-4 py-3">
                     <select className="p-1.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300">
                       <option>{issue.status}</option>
@@ -90,7 +87,6 @@ export default function EmployeeIssues() {
               <p><strong>Ticket ID:</strong> {selectedIssue.ticketId}</p>
               <p><strong>Status:</strong> {selectedIssue.status}</p>
               <p><strong>Timestamp:</strong> {selectedIssue.timestamp}</p>
-              <p><strong>AI Summary:</strong> {selectedIssue.aiSummary}</p>
             </div>
             <button 
               onClick={closeModal} 

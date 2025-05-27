@@ -38,12 +38,6 @@ const Navbar = ({ onLogout, userRole }) => {
             {userRole === 'employee' && (
               <>
                 <Link
-                  to="/employee/dashboard"
-                  className="hover:bg-blue-700 px-3 py-2 rounded transition"
-                >
-                  Dashboard
-                </Link>
-                <Link
                   to="/employee/issues"
                   className="hover:bg-blue-700 px-3 py-2 rounded transition"
                 >
