@@ -19,6 +19,17 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'employee'],
     required: true
   },
+  department: {
+    type: String,
+    enum: ['Water', 'Electricity', 'Roads', 'Sanitation', 'Garbage Collection', 'Street Lights', 'Drainage', 'Public Toilets', 'Other'],
+    required: function() {
+      return this.role === 'employee';
+    }
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

@@ -30,7 +30,7 @@ const Navbar = ({ onLogout, userRole }) => {
                   to="/admin/employees"
                   className="hover:bg-blue-700 px-3 py-2 rounded transition"
                 >
-                  Employees
+                  Users
                 </Link>
               </>
             )}
