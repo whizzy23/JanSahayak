@@ -123,7 +123,7 @@ export const authService = {
       }
 
       console.log('Creating new user:', userData);
-      const response = await api.post('/auth/create-user', userData, {
+      const response = await api.post('/auth/users', userData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
