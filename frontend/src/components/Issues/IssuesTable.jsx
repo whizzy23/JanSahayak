@@ -23,7 +23,7 @@ export default function IssuesTable({ issues, openModal }) {
               <td className="p-3">
                 <button
                   onClick={() => openModal(issue)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-md"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-md cursor-pointer transition duration-200 shadow-md"
                 >
                   View
                 </button>

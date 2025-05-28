@@ -13,6 +13,6 @@ router.get('/stats', getIssueStats);
 router.get('/:ticketId', getIssueById);
 
 // Update issue by ticketId
-router.put('/:ticketId', updateIssue);
+router.patch('/:ticketId', updateIssue);
 
 module.exports = router;

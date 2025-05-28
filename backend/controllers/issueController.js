@@ -26,9 +26,10 @@ const getIssueStats = async (req, res) => {
     const total = await Issue.countDocuments();
     const assigned = await Issue.countDocuments({ status: 'Assigned' });
     const pending = await Issue.countDocuments({ status: 'Pending' });
-    const resolved = await Issue.countDocuments({ status: 'Resolved' });
-    const unresolved = await Issue.countDocuments({ status: 'Unresolved' });
-
+    const closed = await Issue.countDocuments({ status: 'Closed' });
+    const resolved = await Issue.countDocuments({ resolution: 'Resolved' });
+    const unresolved = await Issue.countDocuments({ resolution: 'Unresolved' });
+    
     const byDepartmentRaw = await Issue.aggregate([
       {
         $group: {
@@ -43,14 +44,14 @@ const getIssueStats = async (req, res) => {
       byDepartment[dep._id] = dep.count;
     });
 
-    res.json({ total, assigned, pending, resolved, unresolved, byDepartment });
+    res.json({ total, assigned, pending, resolved, unresolved, byDepartment, closed });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 };
 
-// PUT Update an issue /api/issues/:ticketId
+// PATCH Update an issue /api/issues/:ticketId
 updateIssue = async (req, res) => {
   try {
     const updates = (({
@@ -58,6 +59,7 @@ updateIssue = async (req, res) => {
       urgency,
       comments,
       assignedTo,
+      department,
       resolution,
       resolutionDate
     }) => ({
@@ -67,6 +69,7 @@ updateIssue = async (req, res) => {
       ...(assignedTo && { assignedTo }),
       ...(resolution && { resolution }),
       ...(resolutionDate && { resolutionDate }),
+      ...(department && { department })
     }))(req.body);  
 
     const issue = await Issue.findOneAndUpdate(
