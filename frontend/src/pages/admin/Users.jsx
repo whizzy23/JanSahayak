@@ -61,15 +61,15 @@ const Users = () => {
   if (error) return <p className="text-red-600 text-center">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 mt-16">
       <h2 className="text-4xl font-bold mb-8 text-center text-blue-700">User Management</h2>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-blue-100">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
           >
             Add New User
           </button>

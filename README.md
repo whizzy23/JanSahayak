@@ -1,4 +1,36 @@
-# WhatsApp Chatbot Setup using Twilio and Node.js
+# JanSahayak - Municipal Grievance Management System
+
+## About
+
+JanSahayak is a comprehensive municipal grievance management system designed specifically for Madhya Pradesh. It provides a modern, efficient platform for citizens to report and track various municipal issues across the state's major cities including Bhopal, Indore, Gwalior, Jabalpur, and others.
+
+### Key Features
+
+- **Multi-Department Support**: Handles grievances across various departments:
+  - Water Supply
+  - Electricity
+  - Roads
+  - Sanitation
+  - Garbage Collection
+  - Street Lights
+  - Drainage
+  - Public Toilets
+
+- **State-wide Coverage**: Currently serving major cities in Madhya Pradesh:
+  - Bhopal Municipal Corporation
+  - Indore Municipal Corporation
+  - Gwalior Municipal Corporation
+  - Jabalpur Municipal Corporation
+  - And other municipal corporations across the state
+
+- **Multiple Access Channels**:
+  - Web Portal
+  - WhatsApp Chatbot
+  - Mobile Application
+
+- **Real-time Tracking**: Citizens can track their complaint status in real-time
+
+- **Department-wise Analytics**: Comprehensive dashboard for municipal authorities to monitor and manage issues
 
 ## Prerequisites
 

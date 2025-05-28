@@ -1,45 +1,183 @@
 import { useState } from 'react';
-import Login from '../components/Auth/Login';
-import Signup from '../components/Auth/Signup';
+import { authService } from '../services/authService';
+import { motion } from 'framer-motion';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    department: '',
+    role: 'employee'
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const toggleAuthMode = () => {
-    setIsLogin(!isLogin);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await authService.login(formData.email, formData.password);
+      } else {
+        if (formData.role === 'employee' && !formData.department) {
+          setError('Please select a department');
+          setLoading(false);
+          return;
+        }
+        await authService.register(
+          formData.name,
+          formData.email,
+          formData.password,
+          formData.role,
+          formData.department || ''
+        );
+      }
+      onAuthSuccess();
+    } catch (err) {
+      setError(err.message || 'Authentication failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto">
-        {isLogin ? (
-          <>
-            <Login onLoginSuccess={onAuthSuccess} />
-            <p className="mt-4 text-center text-gray-600">
-              Don't have an account?{' '}
-              <button
-                onClick={toggleAuthMode}
-                className="text-blue-500 hover:text-blue-600 font-medium cursor-pointer"
-              >
-                Sign up
-              </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-blue-100 to-blue-300 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <div className="bg-white/95 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-blue-300">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-blue-900 mb-2">
+              {isLogin ? 'Welcome Back' : 'Create Account'}
+            </h2>
+            <p className="text-gray-600">
+              {isLogin ? 'Sign in to manage grievances' : 'Join our municipal team'}
             </p>
-          </>
-        ) : (
-          <>
-            <Signup onSignupSuccess={onAuthSuccess} />
-            <p className="mt-4 text-center text-gray-600">
-              Already have an account?{' '}
-              <button
-                onClick={toggleAuthMode}
-                className="text-blue-500 hover:text-blue-600 font-medium cursor-pointer"
-              >
-                Login
-              </button>
-            </p>
-          </>
-        )}
-      </div>
+          </div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {!isLogin && (
+              <>
+                <div>
+                  <label className="block text-gray-700 mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">Role</label>
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                  >
+                    <option value="employee">Employee</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+
+                {formData.role === 'employee' && (
+                  <div>
+                    <label className="block text-gray-700 mb-2">Department</label>
+                    <select
+                      name="department"
+                      value={formData.department}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    >
+                      <option value="">Select Department</option>
+                      <option value="Water">Water</option>
+                      <option value="Electricity">Electricity</option>
+                      <option value="Roads">Roads</option>
+                      <option value="Sanitation">Sanitation</option>
+                      <option value="Garbage Collection">Garbage Collection</option>
+                      <option value="Street Lights">Street Lights</option>
+                      <option value="Drainage">Drainage</option>
+                      <option value="Public Toilets">Public Toilets</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
+
+            <div>
+              <label className="block text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-blue-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
+            </motion.button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-blue-600 hover:text-blue-700 transition-colors duration-300"
+            >
+              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            </button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

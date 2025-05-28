@@ -11,6 +11,11 @@ export const authService = {
     }
   },
 
+  // Alias for signup to maintain backward compatibility
+  async register(name, email, password, role, department) {
+    return this.signup(name, email, password, role, department);
+  },
+
   async login(email, password) {
     try {
       const response = await api.post('/auth/login', { email, password });

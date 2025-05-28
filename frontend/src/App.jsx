@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Auth from './pages/Auth';
+import Landing from './pages/Landing';
 import ProtectedRoute from './hoc/ProtectedRoute';
 import { authService } from './services/authService';
 import Navbar from './components/Navbar';
@@ -36,12 +37,14 @@ function App() {
 
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200">
         {isAuthenticated && (
           <Navbar onLogout={handleLogout} userRole={userRole} />
         )}
         <main className="flex-grow">
           <Routes>
+            <Route path="/" element={<Landing />} />
+            
             <Route
               path="/auth"
               element={
@@ -97,23 +100,11 @@ function App() {
               }
             />
 
-            {/* Root Route */}
-            <Route
-              path="/"
-              element={
-                isAuthenticated ? (
-                  <Navigate to={userRole === 'admin' ? '/admin/dashboard' : '/employee/issues'} replace />
-                ) : (
-                  <Navigate to="/auth" replace />
-                )
-              }
-            />
-
             {/* Fallback Route */}
-            <Route path="*" element={<Navigate to="/auth" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
-        <Footer />
+        {!isAuthenticated && <Footer />}
       </div>
     </Router>
   );
