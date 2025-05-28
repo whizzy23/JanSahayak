@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { authService } from '../services/authService';
+import { authService } from '../../services/authService';
 
 const Signup = ({ onSignupSuccess }) => {
   const [email, setEmail] = useState('');
@@ -50,7 +50,7 @@ const Signup = ({ onSignupSuccess }) => {
           </p>
           <button
             onClick={() => onSignupSuccess()}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-pointer"
           >
             Back to Login
           </button>
@@ -152,7 +152,7 @@ const Signup = ({ onSignupSuccess }) => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50"
+          className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 cursor-pointer"
         >
           {loading ? 'Signing up...' : 'Sign Up'}
         </button>

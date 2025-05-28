@@ -1,13 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Auth from './pages/Auth';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './hoc/ProtectedRoute';
 import { authService } from './services/authService';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Dashboard from './pages/admin/Dashboard';
 import Issues from './pages/admin/Issues';
-import Employees from './pages/admin/Employees';
+import Users from './pages/admin/Users';
 import EmployeeIssues from './pages/employee/Issues';
 import Profile from './pages/employee/Profile';
 
@@ -71,10 +71,10 @@ function App() {
               }
             />
             <Route
-              path="/admin/employees"
+              path="/admin/users"
               element={
                 <ProtectedRoute>
-                  {userRole === 'admin' ? <Employees /> : <Navigate to="/auth" replace />}
+                  {userRole === 'admin' ? <Users /> : <Navigate to="/auth" replace />}
                 </ProtectedRoute>
               }
             />

@@ -3,19 +3,27 @@ import { fetchIssues } from "../../services/issueService";
 import Filters from "../../components/Issues/Filters";
 import IssuesTable from "../../components/Issues/IssuesTable";
 import IssueModal from "../../components/Issues/IssuesModal";
+import PageLoader from "../../components/Loader";
 
 const Issues = () => {
   const [issues, setIssues] = useState([]);
   const [filters, setFilters] = useState({ dept: "", status: "", date: "" });
   const [selectedIssue, setSelectedIssue] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const getIssues = async () => {
       try {
         const response = await fetchIssues();
         setIssues(response);
+        setLoading(false);
+        setError("");
       } catch (error) {
         console.error("Error fetching issues:", error);
+        setError("Failed to load issues. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
     getIssues();
@@ -32,6 +40,9 @@ const Issues = () => {
 
     return matchesDept && matchesStatus && matchesDate;
   });
+
+  if (loading) return <PageLoader />;
+  if (error) return <p className="text-red-600 text-center">{error}</p>;  
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

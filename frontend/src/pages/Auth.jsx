@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Login from '../components/Login';
-import Signup from '../components/Signup';
+import Login from '../components/Auth/Login';
+import Signup from '../components/Auth/Signup';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,7 +19,7 @@ const Auth = ({ onAuthSuccess }) => {
               Don't have an account?{' '}
               <button
                 onClick={toggleAuthMode}
-                className="text-blue-500 hover:text-blue-600 font-medium"
+                className="text-blue-500 hover:text-blue-600 font-medium cursor-pointer"
               >
                 Sign up
               </button>
@@ -32,7 +32,7 @@ const Auth = ({ onAuthSuccess }) => {
               Already have an account?{' '}
               <button
                 onClick={toggleAuthMode}
-                className="text-blue-500 hover:text-blue-600 font-medium"
+                className="text-blue-500 hover:text-blue-600 font-medium cursor-pointer"
               >
                 Login
               </button>

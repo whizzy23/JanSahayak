@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import logo from '../images/logo.png';
+import { Link } from "react-router-dom";
+import logo from "/assets/logo.png";
 
 const Navbar = ({ onLogout, userRole }) => {
   return (
@@ -15,10 +15,9 @@ const Navbar = ({ onLogout, userRole }) => {
               />
             </Link>
           </div>
-            
 
           <div className="flex items-center space-x-4">
-            {userRole === 'admin' && (
+            {userRole === "admin" && (
               <>
                 <Link
                   to="/admin/dashboard"
@@ -33,7 +32,7 @@ const Navbar = ({ onLogout, userRole }) => {
                   Issues
                 </Link>
                 <Link
-                  to="/admin/employees"
+                  to="/admin/users"
                   className="hover:bg-blue-700 px-3 py-2 rounded transition"
                 >
                   Users
@@ -41,7 +40,7 @@ const Navbar = ({ onLogout, userRole }) => {
               </>
             )}
 
-            {userRole === 'employee' && (
+            {userRole === "employee" && (
               <>
                 <Link
                   to="/employee/issues"
@@ -57,13 +56,13 @@ const Navbar = ({ onLogout, userRole }) => {
                 </Link>
               </>
             )}
-
-            <button
+            <Link
+              to="/logout"
               onClick={onLogout}
-              className="hover:bg-blue-700 px-4 py-2 rounded transition"
+              className="hover:bg-blue-700 px-3 py-2 rounded transition"
             >
               Logout
-            </button>
+            </Link>
           </div>
         </div>
       </div>

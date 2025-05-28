@@ -14,7 +14,7 @@ export default function IssuesTable({ issues, openModal }) {
         </thead>
         <tbody className="text-center">
           {issues.map(issue => (
-            <tr key={issue.id} className="border-t align-middle">
+            <tr key={issue._id} className="border-t align-middle">
               <td className="p-3">{issue.ticketId}</td>
               <td className="p-3">{issue.department}</td>
               <td className="p-3">{new Date(issue.timestamp).toLocaleDateString()}</td>
