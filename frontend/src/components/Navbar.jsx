@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import logo from '../images/logo.png';
 
 const Navbar = ({ onLogout, userRole }) => {
   return (
@@ -6,10 +7,15 @@ const Navbar = ({ onLogout, userRole }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold tracking-tight">
-              JanSahayak
+            <Link to="/" className="flex items-center space-x-2">
+              <img
+                src={logo}
+                alt="JanSahayak Logo"
+                className="h-25 w-30 object-contain pt-2"
+              />
             </Link>
           </div>
+            
 
           <div className="flex items-center space-x-4">
             {userRole === 'admin' && (

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { fetchIssueStats } from '../../services/issueService'
 import axios from 'axios';
+import PageLoader from '../../components/Loader';
 import PieChart from '../../components/PieChart';
-import { FaChartBar, FaThumbtack, FaHourglassHalf, FaCheckCircle } from 'react-icons/fa';
+import { FaChartBar, FaThumbtack, FaHourglassHalf, FaCheckCircle, FaExclamationTriangle, FaLock } from 'react-icons/fa';
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -25,7 +26,7 @@ export default function Dashboard() {
     getStats();
   }, []);
 
-  if (loading) return <p className="text-center text-gray-600">Loading stats...</p>;
+  if (loading) return <PageLoader />;
   if (error) return <p className="text-center text-red-600">{error}</p>;
 
   return (
@@ -37,7 +38,7 @@ export default function Dashboard() {
       {/* Statistics Overview */}
       
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
       <StatCard
         title="Total Issues"
         value={stats.total}
@@ -62,7 +63,20 @@ export default function Dashboard() {
         color="green"
         icon={<FaCheckCircle className="text-2xl text-green-600" />}
       />
-      </section>
+      <StatCard
+        title="Unresolved"
+        value={stats.unresolved}
+        color="orange"
+        icon={<FaExclamationTriangle className="text-2xl text-orange-500" />}
+      />
+      <StatCard
+        title="Closed"
+        value={stats.closed}
+        color="gray"
+        icon={<FaLock className="text-2xl text-gray-500" />}
+      />
+    </section>
+
 
       {/* Charts */}
       <section className="grid grid-cols-1 gap-6">
