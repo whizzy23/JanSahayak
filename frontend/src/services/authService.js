@@ -1,9 +1,9 @@
 import api from '../api/axiosInstance';
 
 export const authService = {
-  async signup(email, password, role, department) {
+  async signup(name, email, password, role, department) {
     try {
-      const response = await api.post('/auth/signup', { email, password, role, department });
+      const response = await api.post('/auth/signup', { name, email, password, role, department });
       return response.data;
     } catch (error) {
       const message = error.response?.data?.error || 'Signup failed';
@@ -44,6 +44,26 @@ export const authService = {
       return response.data;
     } catch (error) {
       console.error('getAllUsers error:', error.response || error);
+      const message = error.response?.data?.error || error.message || 'Failed to fetch users';
+      throw new Error(message);
+    }
+  },
+
+  async getAllEmployees() {
+    try {
+      const token = this.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.get('/auth/employees', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('getAllEmployees error:', error.response || error);
       const message = error.response?.data?.error || error.message || 'Failed to fetch users';
       throw new Error(message);
     }

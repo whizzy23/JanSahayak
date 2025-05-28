@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { authService } from '../../services/authService';
 
 const Signup = ({ onSignupSuccess }) => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,7 +29,7 @@ const Signup = ({ onSignupSuccess }) => {
     setLoading(true);
 
     try {
-      const response = await authService.signup(email, password, role, department);
+      const response = await authService.signup(name, email, password, role, department);
       setSignupSuccess(true);
     } catch (err) {
       setError(err.message);
@@ -48,12 +49,6 @@ const Signup = ({ onSignupSuccess }) => {
           <p className="text-gray-600 mb-6">
             You will be able to login once your account is verified.
           </p>
-          <button
-            onClick={() => onSignupSuccess()}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 cursor-pointer"
-          >
-            Back to Login
-          </button>
         </div>
       </div>
     );
@@ -82,6 +77,19 @@ const Signup = ({ onSignupSuccess }) => {
           />
         </div>
         <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+            Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">
             Role
           </label>
@@ -89,7 +97,7 @@ const Signup = ({ onSignupSuccess }) => {
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             required
           >
             <option value="employee">Employee</option>
@@ -105,7 +113,7 @@ const Signup = ({ onSignupSuccess }) => {
               id="department"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               required
             >
               <option value="">Select Department</option>

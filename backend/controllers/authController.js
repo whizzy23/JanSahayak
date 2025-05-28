@@ -3,8 +3,9 @@ const User = require('../models/User');
 
 // Signup controller
 const signup = async (req, res) => {
+  console.log("Body", req.body)
   try {
-    const { email, password, role, department } = req.body;
+    const { name, email, password, role, department } = req.body;
 
     // Validate role
     if (!['admin', 'employee'].includes(role)) {
@@ -19,6 +20,7 @@ const signup = async (req, res) => {
 
     // Create user data object
     const userData = {
+      name,
       email,
       password,
       role,
@@ -160,7 +162,7 @@ const removeUser = async (req, res) => {
 // Create user (admin only)
 const createUser = async (req, res) => {
   try {
-    const { email, password, role, department } = req.body;
+    const { name, email, password, role, department } = req.body;
 
     // Validate role
     if (!['admin', 'employee'].includes(role)) {
@@ -175,6 +177,7 @@ const createUser = async (req, res) => {
 
     // Create user data object
     const userData = {
+      name,
       email,
       password,
       role,
