@@ -4,6 +4,9 @@ import AddUserForm from "../../components/Users/AddUserForm";
 import PageLoader from "../../components/Loader";
 import UserTable from "../../components/Users/UserTable";
 import ConfirmationModal from "../../components/Users/ConfirmationModal";
+import PieChart from "../../components/PieChart";
+import BarChart from "../../components/BarChart";
+import { UserCheck, Users as UsersIcon, Shield, AlertTriangle } from 'lucide-react';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -11,6 +14,9 @@ const Users = () => {
   const [error, setError] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ open: false, userId: null });
+  const [filteredUnverified, setFilteredUnverified] = useState([]);
+  const [filteredAdmins, setFilteredAdmins] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
 
   useEffect(() => {
     fetchUsers();
@@ -21,6 +27,9 @@ const Users = () => {
     try {
       const data = await authService.getAllUsers();
       setUsers(data);
+      setFilteredUnverified(data.filter(u => !u.isVerified));
+      setFilteredAdmins(data.filter(u => u.isVerified && u.role === "admin"));
+      setFilteredEmployees(data.filter(u => u.isVerified && u.role === "employee"));
       setError("");
     } catch (err) {
       setError("Failed to fetch users");
@@ -57,26 +66,54 @@ const Users = () => {
   const verifiedAdmins = users.filter((u) => u.isVerified && u.role === "admin");
   const verifiedEmployees = users.filter((u) => u.isVerified && u.role === "employee");
 
+  // Prepare data for department distribution pie chart
+  const departmentData = verifiedEmployees.reduce((acc, user) => {
+    acc[user.department] = (acc[user.department] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Prepare data for user types bar chart
+  const userTypeData = {
+    labels: ['Unverified', 'Admins', 'Employees'],
+    datasets: [{
+      label: 'Number of Users',
+      data: [unverifiedUsers.length, verifiedAdmins.length, verifiedEmployees.length],
+      backgroundColor: [
+        'rgba(30, 58, 138, 0.85)',    // Very dark blue for unverified
+        'rgba(59, 130, 246, 0.85)',   // Medium blue for admins
+        'rgba(147, 197, 253, 0.85)',  // Very light blue for employees
+      ],
+      borderColor: [
+        'rgb(30, 58, 138)',
+        'rgb(59, 130, 246)',
+        'rgb(147, 197, 253)',
+      ],
+      borderWidth: 1,
+      borderRadius: 8,
+    }]
+  };
+
   if (loading) return <PageLoader />;
   if (error) return <p className="text-red-600 text-center">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 mt-16">
-      <h2 className="text-4xl font-bold mb-8 text-center text-blue-700">User Management</h2>
-
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-blue-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">User Management</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-6 mt-16">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-4xl font-extrabold text-blue-900">
+            User Management
+          </h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
           >
             Add New User
           </button>
         </div>
 
+        {/* Add User Form - Moved above charts */}
         {showAddForm && (
-          <div className="mb-6">
+          <div className="mb-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-blue-100">
             <AddUserForm
               onSuccess={() => {
                 fetchUsers();
@@ -87,92 +124,235 @@ const Users = () => {
           </div>
         )}
 
-        <UserTable
-          title="Pending Verifications"
-          users={unverifiedUsers}
-          columns={[
-            { label: "Email", key: "email", className: "w-1/3 truncate" },
-            { label: "Role", key: "role", className: "w-1/6 capitalize" },
-            { label: "Department", key: "department", className: "w-1/6" },
-            {
-              label: "Signup Date",
-              key: "createdAt",
-              className: "w-1/6",
-              render: (user) => new Date(user.createdAt).toLocaleDateString(),
-            },
-          ]}
-          actions={(user) => (
-            <>
-              <button
-                key="_verify"
-                onClick={() => handleVerify(user._id)}
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 cursor-pointer"
-              >
-                Verify
-              </button>
-              <button
-                key="_remove"
-                onClick={() => handleRemove(user._id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 cursor-pointer"
-              >
-                Remove
-              </button>
-            </>
-          )}
-        />
+        {/* Statistics Overview */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <StatCard
+            title="Total Users"
+            value={users.length}
+            icon={<UsersIcon className="w-6 h-6" />}
+            className="bg-gradient-to-br from-slate-50 to-white hover:from-slate-100 hover:to-slate-50"
+          />
+          <StatCard
+            title="Unverified Users"
+            value={unverifiedUsers.length}
+            icon={<AlertTriangle className="w-6 h-6" />}
+            className="bg-gradient-to-br from-yellow-50 to-white hover:from-yellow-100 hover:to-yellow-50"
+          />
+          <StatCard
+            title="Verified Users"
+            value={verifiedAdmins.length + verifiedEmployees.length}
+            icon={<UserCheck className="w-6 h-6" />}
+            className="bg-gradient-to-br from-green-50 to-white hover:from-green-100 hover:to-green-50"
+          />
+        </section>
 
-        <UserTable
-          title="Verified Administrators"
-          users={verifiedAdmins}
-          columns={[
-            { label: "Email", key: "email", className: "w-2/3 truncate" },
-            {
-              label: "Signup Date",
-              key: "createdAt",
-              className: "w-1/6",
-              render: (user) => new Date(user.createdAt).toLocaleDateString(),
-            },
-          ]}
-          actions={(user) => (
-            <button
-              onClick={() => handleRemove(user._id)}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 cursor-pointer"
-            >
-              Remove
-            </button>
-          )}
-        />
+        {/* Charts Section */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
+            <h3 className="text-2xl font-semibold text-blue-900 mb-6 border-b border-blue-100 pb-3">
+              Employees by Department
+            </h3>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-xl" />
+              <div className="p-4 min-h-[280px]">
+                <PieChart
+                  data={Object.entries(departmentData).map(([name, value]) => ({ name, value }))}
+                />
+              </div>
+            </div>
+          </div>
 
-        <UserTable
-          title="Verified Employees"
-          users={verifiedEmployees}
-          columns={[
-            { label: "Email", key: "email", className: "w-1/3 truncate" },
-            { label: "Department", key: "department", className: "w-1/3" },
-            {
-              label: "Signup Date",
-              key: "createdAt",
-              className: "w-1/6",
-              render: (user) => new Date(user.createdAt).toLocaleDateString(),
-            },
-          ]}
-          actions={(user) => (
-            <button
-              onClick={() => handleRemove(user._id)}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 cursor-pointer"
-            >
-              Remove
-            </button>
-          )}
-        />
+          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
+            <h3 className="text-2xl font-semibold text-blue-900 mb-6 border-b border-blue-100 pb-3">
+              Users by Type
+            </h3>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-xl" />
+              <div className="p-4 min-h-[280px]">
+                <BarChart data={userTypeData} />
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <ConfirmationModal
-          isOpen={confirmModal.open}
-          title="Confirm Removal"
-          message="Are you sure you want to remove this user? This action cannot be undone."
-          onCancel={() => setConfirmModal({ open: false, userId: null })}
-          onConfirm={confirmRemove}
-        />
+        {/* User Lists Section */}
+        <section className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-blue-100">
+          <div className="space-y-6">
+            {/* Pending Verifications */}
+            <div className="bg-white rounded-xl shadow-md border border-blue-100">
+              <div className="p-4 border-b border-blue-100">
+                <h3 className="text-xl font-semibold text-blue-900">Pending Verifications</h3>
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => {
+                      const searchTerm = e.target.value.toLowerCase();
+                      const filtered = users.filter(u => 
+                        !u.isVerified && 
+                        (u.email.toLowerCase().includes(searchTerm) || 
+                         u.department?.toLowerCase().includes(searchTerm))
+                      );
+                      setFilteredUnverified(filtered);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="h-[300px] overflow-y-auto overflow-x-hidden">
+                <UserTable
+                  users={filteredUnverified}
+                  columns={[
+                    { label: "Email", key: "email", className: "w-1/4 truncate" },
+                    { label: "Role", key: "role", className: "w-1/6 capitalize" },
+                    { label: "Department", key: "department", className: "w-1/6" },
+                    {
+                      label: "Signup Date",
+                      key: "createdAt",
+                      className: "w-1/6",
+                      render: (user) => new Date(user.createdAt).toLocaleDateString(),
+                    },
+                  ]}
+                  actions={(user) => (
+                    <>
+                      <button
+                        key="_verify"
+                        onClick={() => handleVerify(user._id)}
+                        className="bg-sky-500 text-white px-3 py-1 rounded hover:bg-sky-600 cursor-pointer"
+                      >
+                        Verify
+                      </button>
+                      <button
+                        key="_remove"
+                        onClick={() => handleRemove(user._id)}
+                        className="bg-blue-800 text-white px-3 py-1 rounded hover:bg-blue-900 cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Verified Administrators */}
+            <div className="bg-white rounded-xl shadow-md border border-blue-100">
+              <div className="p-4 border-b border-blue-100">
+                <h3 className="text-xl font-semibold text-blue-900">Verified Administrators</h3>
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    placeholder="Search admins..."
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => {
+                      const searchTerm = e.target.value.toLowerCase();
+                      const filtered = users.filter(u => 
+                        u.isVerified && 
+                        u.role === "admin" && 
+                        u.email.toLowerCase().includes(searchTerm)
+                      );
+                      setFilteredAdmins(filtered);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="h-[300px] overflow-y-auto overflow-x-hidden">
+                <UserTable
+                  users={filteredAdmins}
+                  columns={[
+                    { label: "Email", key: "email", className: "w-3/4 truncate" },
+                    {
+                      label: "Signup Date",
+                      key: "createdAt",
+                      className: "w-1/4",
+                      render: (user) => new Date(user.createdAt).toLocaleDateString(),
+                    },
+                  ]}
+                  actions={(user) => (
+                    <button
+                      onClick={() => handleRemove(user._id)}
+                      className="bg-blue-800 text-white px-3 py-1 rounded hover:bg-blue-900 cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Verified Employees */}
+            <div className="bg-white rounded-xl shadow-md border border-blue-100">
+              <div className="p-4 border-b border-blue-100">
+                <h3 className="text-xl font-semibold text-blue-900">Verified Employees</h3>
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    placeholder="Search employees..."
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => {
+                      const searchTerm = e.target.value.toLowerCase();
+                      const filtered = users.filter(u => 
+                        u.isVerified && 
+                        u.role === "employee" && 
+                        (u.email.toLowerCase().includes(searchTerm) || 
+                         u.department?.toLowerCase().includes(searchTerm))
+                      );
+                      setFilteredEmployees(filtered);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="h-[300px] overflow-y-auto overflow-x-hidden">
+                <UserTable
+                  users={filteredEmployees}
+                  columns={[
+                    { label: "Email", key: "email", className: "w-1/3 truncate" },
+                    { label: "Department", key: "department", className: "w-1/3" },
+                    {
+                      label: "Signup Date",
+                      key: "createdAt",
+                      className: "w-1/3",
+                      render: (user) => new Date(user.createdAt).toLocaleDateString(),
+                    },
+                  ]}
+                  actions={(user) => (
+                    <button
+                      onClick={() => handleRemove(user._id)}
+                      className="bg-blue-800 text-white px-3 py-1 rounded hover:bg-blue-900 cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+
+          <ConfirmationModal
+            isOpen={confirmModal.open}
+            title="Confirm Removal"
+            message="Are you sure you want to remove this user? This action cannot be undone."
+            onCancel={() => setConfirmModal({ open: false, userId: null })}
+            onConfirm={confirmRemove}
+          />
+        </section>
+      </div>
+    </div>
+  );
+}
+
+// StatCard component
+function StatCard({ title, value, icon, className }) {
+  return (
+    <div className={`${className} p-6 rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-600 text-sm font-medium">{title}</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+        </div>
+        <div className="p-3 bg-white/50 rounded-xl">
+          {icon}
+        </div>
       </div>
     </div>
   );
