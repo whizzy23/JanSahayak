@@ -46,7 +46,9 @@ export default function Profile() {
         const employeeId = localStorage.getItem("id");
         const response = await fetchAllIssuesOfEmployee(employeeId);
         const closed = response.filter(issue => issue.status === "Closed");
-        const pending = response.filter(issue => issue.status === "Assigned");
+        const pending = response.filter(issue => 
+          issue.status === "Assigned" && issue.resolution === "Unresolved"
+        );
         const resolved = response.filter(issue => issue.resolution === "Resolved");
         
         // Calculate average resolution time for resolved issues only
@@ -261,7 +263,7 @@ export default function Profile() {
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-yellow-500" />
                 <span className="text-sm text-gray-600">
-                  {stats.resolvedIssues} issues closed
+                  {closedIssues.length} issues closed
                 </span>
               </div>
             </div>

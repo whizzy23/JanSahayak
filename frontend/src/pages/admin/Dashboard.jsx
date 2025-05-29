@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { fetchIssueStats } from '../../services/issueService'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import PageLoader from '../../components/Loader';
 import PieChart from '../../components/PieChart';
 import BarChart from '../../components/BarChart';
-import { ClipboardList, UserCheck, Clock, CheckCircle, XCircle, Archive } from 'lucide-react';
+import { FaChartBar, FaThumbtack, FaHourglassHalf, FaCheckCircle, FaExclamationTriangle, FaLock } from 'react-icons/fa';
+import { ClipboardList, UserCheck, Clock, CheckCircle, XCircle, Archive, AlertTriangle, BarChart2, MapPin } from 'lucide-react';
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -34,7 +36,96 @@ export default function Dashboard() {
   if (loading) return <PageLoader />;
   if (error) return <p className="text-center text-red-600">{error}</p>;
 
-  // urgencyData for BarChart
+  // Sample data for the trend graph - replace with actual data from your API
+  const trendData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [
+      {
+        label: 'New Issues',
+        data: [12, 19, 15, 25, 22, 30, 28],
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true
+      },
+      {
+        label: 'Resolved Issues',
+        data: [8, 15, 12, 18, 20, 25, 22],
+        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        tension: 0.4,
+        fill: true
+      }
+    ]
+  };
+
+  // Sample data for centers across states - replace with actual data from your API
+  const centersData = {
+    "Andhra Pradesh": { value: 2, color: "#4F46E5" },
+    "Arunachal Pradesh": { value: 1, color: "#4F46E5" },
+    "Assam": { value: 2, color: "#4F46E5" },
+    "Bihar": { value: 3, color: "#4F46E5" },
+    "Chhattisgarh": { value: 2, color: "#4F46E5" },
+    "Delhi": { value: 2, color: "#4F46E5" },
+    "Goa": { value: 1, color: "#4F46E5" },
+    "Gujarat": { value: 3, color: "#4F46E5" },
+    "Haryana": { value: 2, color: "#4F46E5" },
+    "Himachal Pradesh": { value: 1, color: "#4F46E5" },
+    "Jharkhand": { value: 2, color: "#4F46E5" },
+    "Karnataka": { value: 3, color: "#4F46E5" },
+    "Kerala": { value: 2, color: "#4F46E5" },
+    "Madhya Pradesh": { value: 2, color: "#4F46E5" },
+    "Maharashtra": { value: 5, color: "#4F46E5" },
+    "Manipur": { value: 1, color: "#4F46E5" },
+    "Meghalaya": { value: 1, color: "#4F46E5" },
+    "Mizoram": { value: 1, color: "#4F46E5" },
+    "Nagaland": { value: 1, color: "#4F46E5" },
+    "Odisha": { value: 2, color: "#4F46E5" },
+    "Punjab": { value: 2, color: "#4F46E5" },
+    "Rajasthan": { value: 2, color: "#4F46E5" },
+    "Sikkim": { value: 1, color: "#4F46E5" },
+    "Tamil Nadu": { value: 3, color: "#4F46E5" },
+    "Telangana": { value: 2, color: "#4F46E5" },
+    "Tripura": { value: 1, color: "#4F46E5" },
+    "Uttar Pradesh": { value: 4, color: "#4F46E5" },
+    "Uttarakhand": { value: 1, color: "#4F46E5" },
+    "West Bengal": { value: 2, color: "#4F46E5" }
+  };
+
+  // Custom positions for states
+  const statePositions = {
+    "Andhra Pradesh": { x: 550, y: 450 },
+    "Arunachal Pradesh": { x: 650, y: 200 },
+    "Assam": { x: 600, y: 250 },
+    "Bihar": { x: 550, y: 300 },
+    "Chhattisgarh": { x: 500, y: 400 },
+    "Delhi": { x: 450, y: 300 },
+    "Goa": { x: 400, y: 450 },
+    "Gujarat": { x: 350, y: 350 },
+    "Haryana": { x: 450, y: 280 },
+    "Himachal Pradesh": { x: 450, y: 200 },
+    "Jharkhand": { x: 550, y: 350 },
+    "Karnataka": { x: 450, y: 450 },
+    "Kerala": { x: 400, y: 500 },
+    "Madhya Pradesh": { x: 450, y: 350 },
+    "Maharashtra": { x: 400, y: 400 },
+    "Manipur": { x: 650, y: 300 },
+    "Meghalaya": { x: 600, y: 280 },
+    "Mizoram": { x: 650, y: 350 },
+    "Nagaland": { x: 650, y: 250 },
+    "Odisha": { x: 550, y: 380 },
+    "Punjab": { x: 450, y: 250 },
+    "Rajasthan": { x: 400, y: 300 },
+    "Sikkim": { x: 600, y: 220 },
+    "Tamil Nadu": { x: 450, y: 500 },
+    "Telangana": { x: 500, y: 400 },
+    "Tripura": { x: 650, y: 320 },
+    "Uttar Pradesh": { x: 500, y: 300 },
+    "Uttarakhand": { x: 500, y: 250 },
+    "West Bengal": { x: 600, y: 320 }
+  };
+
+  // Sample data for urgency levels - replace with actual data from your API
   const urgencyData = {
     labels: ['High', 'Medium', 'Low'],
     datasets: [{
@@ -101,6 +192,21 @@ export default function Dashboard() {
           <h2 className="text-4xl font-extrabold text-blue-900">
             Admin Dashboard
           </h2>
+          <div className="flex space-x-2">
+            {['week', 'month', 'year'].map((timeframe) => (
+              <button
+                key={timeframe}
+                onClick={() => setSelectedTimeframe(timeframe)}
+                className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                  selectedTimeframe === timeframe
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white/80 text-blue-600 hover:bg-blue-50'
+                }`}
+              >
+                {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Statistics Overview */}
@@ -237,6 +343,7 @@ export default function Dashboard() {
                       <div className="relative">
                         <h4 className="text-sm font-semibold text-blue-900 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">{corporation}</h4>
                         <p className="text-xs text-blue-600 mt-1 group-hover:text-blue-500 transition-colors duration-300">Active</p>
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-blue-500/10 transition-all duration-300 rounded-lg" />
                       </div>
                     </div>
                   ))}
