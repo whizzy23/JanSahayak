@@ -1,4 +1,6 @@
-const Issue = require('../models/Issue');
+const Issue = require("../models/Issue");
+const User = require("../models/User");
+const mongoose = require("mongoose");
 
 // GET all issues /api/issues
 getAllIssues = async (req, res) => {
@@ -6,7 +8,35 @@ getAllIssues = async (req, res) => {
     const issues = await Issue.find().sort({ timestamp: -1 });
     res.json(issues);
   } catch (err) {
-    res.status(500).json({ error: 'Server error while fetching issues.' });
+    res.status(500).json({ error: "Server error while fetching issues." });
+  }
+};
+
+// GET all issue of employee
+const getAllIssueOfEmployee = async (req, res) => {
+  const { employeeId } = req.params;
+
+  // Validate employeeId format
+  if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+    return res.status(400).json({ error: "Invalid employee ID format" });
+  }
+
+  try {
+    const issues = await Issue.find({ assignedTo: employeeId }).populate(
+      "assignedTo",
+      "name email"
+    );
+
+    if (!issues.length) {
+      return res
+        .status(404)
+        .json({ message: "No issues found for this employee" });
+    }
+
+    res.status(200).json(issues);
+  } catch (err) {
+    console.error("Error fetching issues for employee:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -14,80 +44,139 @@ getAllIssues = async (req, res) => {
 getIssueById = async (req, res) => {
   try {
     const issue = await Issue.findOne({ ticketId: req.params.ticketId });
-    if (!issue) return res.status(404).json({ error: 'Issue not found.' });
+    if (!issue) return res.status(404).json({ error: "Issue not found." });
     res.json(issue);
   } catch (err) {
-    res.status(500).json({ error: 'Error fetching issue.' });
+    res.status(500).json({ error: "Error fetching issue." });
   }
 };
 
 const getIssueStats = async (req, res) => {
   try {
     const total = await Issue.countDocuments();
-    const assigned = await Issue.countDocuments({ status: 'Assigned' });
-    const pending = await Issue.countDocuments({ status: 'Pending' });
-    const closed = await Issue.countDocuments({ status: 'Closed' });
-    const resolved = await Issue.countDocuments({ resolution: 'Resolved' });
-    const unresolved = await Issue.countDocuments({ resolution: 'Unresolved' });
-    
+    const assigned = await Issue.countDocuments({ status: "Assigned" });
+    const pending = await Issue.countDocuments({ status: "Pending" });
+    const closed = await Issue.countDocuments({ status: "Closed" });
+    const resolved = await Issue.countDocuments({ resolution: "Resolved" });
+    const unresolved = await Issue.countDocuments({ resolution: "Unresolved" });
+
     const byDepartmentRaw = await Issue.aggregate([
       {
         $group: {
-          _id: '$department',
+          _id: "$department",
           count: { $sum: 1 },
         },
       },
     ]);
 
     const byDepartment = {};
-    byDepartmentRaw.forEach(dep => {
+    byDepartmentRaw.forEach((dep) => {
       byDepartment[dep._id] = dep.count;
     });
 
-    res.json({ total, assigned, pending, resolved, unresolved, byDepartment, closed });
+    res.json({
+      total,
+      assigned,
+      pending,
+      resolved,
+      unresolved,
+      byDepartment,
+      closed,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to fetch stats' });
+    res.status(500).json({ error: "Failed to fetch stats" });
   }
 };
 
-// PATCH Update an issue /api/issues/:ticketId
-updateIssue = async (req, res) => {
+const assignIssue = async (req, res) => {
   try {
-    const updates = (({
+    const { issueId, employeeId } = req.body;
+
+    if (!issueId) {
+      return res.status(400).json({ error: "Issue ID is required" });
+    }
+
+    const issue = await Issue.findById(issueId);
+    if (!issue) {
+      return res.status(404).json({ error: "Issue not found" });
+    }
+
+    if (!employeeId) {
+      // Unassign the issue and set status to Pending
+      issue.assignedTo = null;
+      issue.status = "Pending";
+    } else {
+      const employee = await User.findById(employeeId);
+      if (!employee || employee.role !== "employee") {
+        return res.status(404).json({ error: "Employee not found or invalid" });
+      }
+
+      issue.assignedTo = employeeId;
+      issue.status = "Assigned";
+    }
+
+    await issue.save();
+
+    res.status(200).json({
+      message: employeeId ? "Issue assigned successfully" : "Issue unassigned successfully",
+      issueId: issue._id,
+      status: issue.status,
+      assignedTo: issue.assignedTo,
+    });
+  } catch (error) {
+    console.error("Error assigning issue:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const updateIssue = async (req, res) => {
+  try {
+    let {
       status,
       urgency,
       comments,
-      assignedTo,
       department,
       resolution,
-      resolutionDate
-    }) => ({
-      ...(status && { status }),
-      ...(urgency && { urgency }),
-      ...(comments && { comments }),
-      ...(assignedTo && { assignedTo }),
-      ...(resolution && { resolution }),
-      ...(resolutionDate && { resolutionDate }),
-      ...(department && { department })
-    }))(req.body);  
+      resolutionDate,
+    } = req.body;
+
+    const updates = {};
+
+    if (status) {
+      updates.status = status;
+
+      // If status is being set to "Pending", clear assignedTo
+      if (status === "Pending") {
+        updates.assignedTo = null;
+      }
+    }
+
+    if (urgency) updates.urgency = urgency;
+    if (comments) updates.comments = comments;
+    if (department) updates.department = department;
+    if (resolution) updates.resolution = resolution;
+    if (resolutionDate) updates.resolutionDate = resolutionDate;
 
     const issue = await Issue.findOneAndUpdate(
       { ticketId: req.params.ticketId },
       { $set: updates },
       { new: true }
-    );  
+    );
 
-    if (!issue) return res.status(404).json({ error: 'Issue not found.' });
+    if (!issue) return res.status(404).json({ error: "Issue not found." });
     res.json(issue);
   } catch (err) {
-    res.status(500).json({ error: 'Error updating issue.' });
-  }  
-};  
+    console.error("Error updating issue:", err);
+    res.status(500).json({ error: "Error updating issue." });
+  }
+};
 
 module.exports = {
   getAllIssues,
   getIssueById,
+  getAllIssueOfEmployee,
+  assignIssue,
   updateIssue,
-  getIssueStats
+  getIssueStats,
 };
