@@ -44,6 +44,9 @@ const Issues = () => {
     getIssues();
   }, [employeeId]);
 
+  if (loading) return <PageLoader />;
+  if (error) return <p className="text-center text-red-600">{error}</p>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-6 pt-20 transition-all duration-300">
       <div className="max-w-5xl mx-auto">
@@ -51,28 +54,12 @@ const Issues = () => {
           Assigned Issues
         </h2>
 
-        {loading && (
-          <div className="flex justify-center mt-20">
-            <PageLoader />
+        {issues.length === 0 ? (
+          <div className="text-center text-gray-600 mt-16 text-lg italic">
+            No issues assigned to you at the moment.
           </div>
-        )}
-
-        {!loading && error && (
-          <div className="text-red-600 text-center text-lg font-semibold p-4 bg-red-100 border border-red-300 rounded-xl shadow-md max-w-xl mx-auto">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <>
-            {issues.length === 0 ? (
-              <div className="text-center text-gray-600 mt-16 text-lg italic">
-                No issues assigned to you at the moment.
-              </div>
-            ) : (
-              <IssuesTable issues={issues} openModal={setSelectedIssue} />
-            )}
-          </>
+        ) : (
+          <IssuesTable issues={issues} openModal={setSelectedIssue} />
         )}
 
         {selectedIssue && (
