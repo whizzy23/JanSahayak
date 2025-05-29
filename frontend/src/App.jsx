@@ -17,6 +17,7 @@ import Issues from "./pages/admin/Issues";
 import Users from "./pages/admin/Users";
 import EmployeeIssues from "./pages/employee/Issues";
 import Profile from "./pages/employee/Profile";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,8 +52,24 @@ function App() {
           )}
           <main className="flex-grow">
             <Routes>
-              <Route path="/" element={<Landing />} />
-
+              {/* Public Routes */}
+              <Route
+                path="/"
+                element={
+                  isAuthenticated ? (
+                    <Navigate
+                      to={
+                        userRole === "admin"
+                          ? "/admin/dashboard"
+                          : "/employee/issues"
+                      }
+                      replace
+                    />
+                  ) : (
+                    <Landing />
+                  )
+                }
+              />
               <Route
                 path="/auth"
                 element={
@@ -75,36 +92,24 @@ function App() {
               <Route
                 path="/admin/dashboard"
                 element={
-                  <ProtectedRoute>
-                    {userRole === "admin" ? (
-                      <Dashboard />
-                    ) : (
-                      <Navigate to="/auth" replace />
-                    )}
+                  <ProtectedRoute role="admin">
+                    <Dashboard />
                   </ProtectedRoute>
                 }
               />
               <Route
                 path="/admin/issues"
                 element={
-                  <ProtectedRoute>
-                    {userRole === "admin" ? (
-                      <Issues />
-                    ) : (
-                      <Navigate to="/auth" replace />
-                    )}
+                  <ProtectedRoute role="admin">
+                    <Issues />
                   </ProtectedRoute>
                 }
               />
               <Route
                 path="/admin/users"
                 element={
-                  <ProtectedRoute>
-                    {userRole === "admin" ? (
-                      <Users />
-                    ) : (
-                      <Navigate to="/auth" replace />
-                    )}
+                  <ProtectedRoute role="admin">
+                    <Users />
                   </ProtectedRoute>
                 }
               />
@@ -113,30 +118,22 @@ function App() {
               <Route
                 path="/employee/issues"
                 element={
-                  <ProtectedRoute>
-                    {userRole === "employee" ? (
-                      <EmployeeIssues />
-                    ) : (
-                      <Navigate to="/auth" replace />
-                    )}
+                  <ProtectedRoute role="employee">
+                    <EmployeeIssues />
                   </ProtectedRoute>
                 }
               />
               <Route
                 path="/employee/profile"
                 element={
-                  <ProtectedRoute>
-                    {userRole === "employee" ? (
-                      <Profile />
-                    ) : (
-                      <Navigate to="/auth" replace />
-                    )}
+                  <ProtectedRoute role="employee">
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
 
               {/* Fallback Route */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           {!isAuthenticated && <Footer />}

@@ -236,7 +236,7 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
                   Select Field
                 </label>
                 <select
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 cursor-pointer"
                   value={editField}
                   onChange={(e) => {
                     const sel = e.target.value;
@@ -319,7 +319,7 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
 
             {isEditingAllowed && (
               <button
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-md font-semibold"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-md font-semibold cursor-pointer"
                 onClick={() => {
                   if (isEditing) {
                     setIsEditing(false);
@@ -336,7 +336,7 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
 
             {isEditing && isEditingAllowed && (
               <button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-md font-semibold disabled:opacity-50"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-md font-semibold disabled:opacity-50 cursor-pointer"
                 disabled={!editValue.trim()}
                 onClick={handleChangeField}
               >
