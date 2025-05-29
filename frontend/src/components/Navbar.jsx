@@ -34,7 +34,7 @@ const Navbar = ({ onLogout, userRole }) => {
       <div className="max-w-7x mx-8 rem px-0 sm:px-0 lg:px-0">
         <div className="flex justify-between items-center h-12">
           <div className="flex items-center pt-2">
-            <Link to="/" className="flex items-center space-x-1 hidden md:flex">
+            <Link to="/" className="flex items-center space-x-1 md:flex">
               <img
                 src={logo}
                 alt="JanSahayak Logo"

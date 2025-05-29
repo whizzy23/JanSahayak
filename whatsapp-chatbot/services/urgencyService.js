@@ -1,9 +1,10 @@
+require('dotenv').config();
 const axios = require('axios');
 
 // Function to classify urgency level using the Python spaCy service
 async function classifyUrgency(text) {
     try {
-        const response = await axios.post('http://localhost:5000/classify', {
+        const response = await axios.post(`${process.env.FLASK_URL}/classify`, {
             text: text
         });
         return response.data.urgency;
