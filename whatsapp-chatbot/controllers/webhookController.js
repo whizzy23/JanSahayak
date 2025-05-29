@@ -90,7 +90,6 @@ exports.handleIncoming = async (req, res) => {
   }
 
   if (text === "RESET") {
-    clearSession(from);
     session.step = STEPS.START;
     return sendReply(
       res,
@@ -205,14 +204,13 @@ exports.handleIncoming = async (req, res) => {
         await Issue.create({
           phone: from,
           department: session.department,
-          deptCode,
           location: session.location,
           description: session.description,
           ticketId: ticket,
           urgency
         });
         session.step = STEPS.COMPLETE;
-        reply = `Registered!\n🎫 Ticket ID: ${ticket}\nUrgency: ${urgency}\nReply TRACK ${ticket} to check status.`;
+        reply = `Registered!\n🎫 Ticket ID: ${ticket}\nReply TRACK ${ticket} to check status.`;
       } else {
         reply = "Please reply 1 for Yes or 2 for No.";
       }
@@ -227,7 +225,6 @@ exports.handleIncoming = async (req, res) => {
         await Issue.create({
           phone: from,
           department: session.department,
-          deptCode,
           location: session.location,
           description: session.description,
           imageUrl: mediaUrl,
