@@ -105,7 +105,7 @@ const Users = () => {
           </h2>
           <button
             onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg cursor-pointer"
           >
             Add New User
           </button>

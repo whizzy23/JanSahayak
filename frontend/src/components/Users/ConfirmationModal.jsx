@@ -1,21 +1,46 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { AiOutlineClose } from "react-icons/ai";
+
 const ConfirmationModal = ({ isOpen, onCancel, onConfirm, title, message }) => {
+  // Prevent background scroll when open
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-md w-full max-w-md p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
-        <p className="text-gray-700 mb-4">{message}</p>
-        <div className="flex justify-end space-x-3">
+  // The modal content we’ll portal to body
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all duration-300 ease-out scale-95 animate-fadeIn">
+        <button
+          onClick={onCancel}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+          aria-label="Close"
+        >
+          <AiOutlineClose size={20} />
+        </button>
+
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
+          {title}
+        </h3>
+        <p className="text-gray-600 mb-6 text-center">{message}</p>
+
+        <div className="flex justify-center space-x-4">
           <button
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
+            className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 transition cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
+            className="px-5 py-2 bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-400 transition cursor-pointer"
           >
             Confirm
           </button>
@@ -23,6 +48,8 @@ const ConfirmationModal = ({ isOpen, onCancel, onConfirm, title, message }) => {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default ConfirmationModal;
