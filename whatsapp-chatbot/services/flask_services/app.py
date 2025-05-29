@@ -1,5 +1,9 @@
 from flask import Flask, request, jsonify
 from nlp_service import classify_text_urgency
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -15,4 +19,5 @@ def classify():
     return jsonify({"urgency": urgency})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.getenv("FLASK_PORT", 5000))
+    app.run(debug=True, port=port)
