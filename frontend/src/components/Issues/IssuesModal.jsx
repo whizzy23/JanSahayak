@@ -168,7 +168,7 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
                 <strong>Urgency:</strong> {currentIssue.urgency}
               </div>
               <div>
-                <strong>Phone:</strong> {currentIssue.phone?.slice(11) || "N/A"}
+                <strong>Phone:</strong> {currentIssue.phone?.slice(12) || "N/A"}
               </div>
               <div>
                 <strong>Assigned To:</strong>{" "}
