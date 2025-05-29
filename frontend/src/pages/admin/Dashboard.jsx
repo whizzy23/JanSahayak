@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchIssueStats } from '../../services/issueService'
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PageLoader from '../../components/Loader';
 import PieChart from '../../components/PieChart';
@@ -14,6 +15,7 @@ export default function Dashboard() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('week');
   const [hoveredStat, setHoveredStat] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getStats = async () => {
@@ -128,7 +130,11 @@ export default function Dashboard() {
     labels: ['High', 'Medium', 'Low'],
     datasets: [{
       label: 'Number of Issues',
-      data: [15, 25, 10],
+      data: [
+        stats?.byUrgency?.high || 0,
+        stats?.byUrgency?.medium || 0,
+        stats?.byUrgency?.low || 0
+      ],
       backgroundColor: [
         'rgba(0, 41, 82, 0.85)',     // Midnight Blue (darkest) for high
         'rgba(0, 98, 204, 0.85)',    // Darker Blue (medium) for medium
@@ -147,6 +153,36 @@ export default function Dashboard() {
         'rgba(204, 229, 255, 1)',
       ],
     }]
+  };
+
+  const handleStatClick = (type) => {
+    let filterParams = {};
+    
+    switch(type) {
+      case 'total':
+        // No filters for total
+        break;
+      case 'assigned':
+        filterParams = { status: 'Assigned' };
+        break;
+      case 'pending':
+        filterParams = { status: 'Pending' };
+        break;
+      case 'resolved':
+        filterParams = { resolution: 'Resolved' };
+        break;
+      case 'unresolved':
+        filterParams = { resolution: 'Unresolved' };
+        break;
+      case 'closed':
+        filterParams = { status: 'Closed' };
+        break;
+      default:
+        break;
+    }
+
+    // Navigate to issues page with filters
+    navigate('/admin/issues', { state: { filters: filterParams } });
   };
 
   return (
@@ -177,51 +213,57 @@ export default function Dashboard() {
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatCard
             title="Total Issues"
-            value={stats.totalIssues}
+            value={stats?.total || 0}
             icon={<ClipboardList className="w-6 h-6" />}
             className="bg-gradient-to-br from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('total')}
             isHovered={hoveredStat === 'total'}
+            onClick={() => handleStatClick('total')}
           />
           <StatCard
             title="Assigned Issues"
-            value={stats.assignedIssues}
+            value={stats?.assigned || 0}
             icon={<UserCheck className="w-6 h-6" />}
             className="bg-gradient-to-br from-cyan-50 to-white hover:from-cyan-100 hover:to-cyan-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('assigned')}
             isHovered={hoveredStat === 'assigned'}
+            onClick={() => handleStatClick('assigned')}
           />
           <StatCard
             title="Pending Issues"
-            value={stats.pendingIssues}
+            value={stats?.pending || 0}
             icon={<Clock className="w-6 h-6" />}
             className="bg-gradient-to-br from-yellow-50 to-white hover:from-yellow-100 hover:to-yellow-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('pending')}
             isHovered={hoveredStat === 'pending'}
+            onClick={() => handleStatClick('pending')}
           />
           <StatCard
             title="Resolved Issues"
-            value={stats.resolvedIssues}
+            value={stats?.resolved || 0}
             icon={<CheckCircle className="w-6 h-6" />}
             className="bg-gradient-to-br from-green-50 to-white hover:from-green-100 hover:to-green-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('resolved')}
             isHovered={hoveredStat === 'resolved'}
+            onClick={() => handleStatClick('resolved')}
           />
           <StatCard
             title="Unresolved Issues"
-            value={stats.unresolvedIssues}
+            value={stats?.unresolved || 0}
             icon={<XCircle className="w-6 h-6" />}
             className="bg-gradient-to-br from-red-50 to-white hover:from-red-100 hover:to-red-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('unresolved')}
             isHovered={hoveredStat === 'unresolved'}
+            onClick={() => handleStatClick('unresolved')}
           />
           <StatCard
             title="Closed Issues"
-            value={stats.closedIssues}
+            value={stats?.closed || 0}
             icon={<Archive className="w-6 h-6" />}
             className="bg-gradient-to-br from-purple-50 to-white hover:from-purple-100 hover:to-purple-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('closed')}
             isHovered={hoveredStat === 'closed'}
+            onClick={() => handleStatClick('closed')}
           />
         </section>
 
@@ -316,12 +358,13 @@ export default function Dashboard() {
 }
 
 // Enhanced Stat Card component
-function StatCard({ title, value, icon, className, onHover, isHovered }) {
+function StatCard({ title, value, icon, className, onHover, isHovered, onClick }) {
   return (
     <div 
-      className={`bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition duration-200 ${className}`}
+      className={`bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition duration-200 cursor-pointer ${className}`}
       onMouseEnter={onHover}
       onMouseLeave={() => onHover(null)}
+      onClick={onClick}
     >
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-md font-semibold text-gray-600">{title}</h4>

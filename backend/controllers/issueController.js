@@ -57,6 +57,11 @@ const getIssueStats = async (req, res) => {
     const resolved = await Issue.countDocuments({ resolution: "Resolved" });
     const unresolved = await Issue.countDocuments({ resolution: "Unresolved" });
 
+    // Get counts by urgency
+    const highUrgency = await Issue.countDocuments({ urgency: "High" });
+    const mediumUrgency = await Issue.countDocuments({ urgency: "Medium" });
+    const lowUrgency = await Issue.countDocuments({ urgency: "Low" });
+
     const byDepartmentRaw = await Issue.aggregate([
       {
         $group: {
@@ -79,6 +84,11 @@ const getIssueStats = async (req, res) => {
       unresolved,
       byDepartment,
       closed,
+      byUrgency: {
+        high: highUrgency,
+        medium: mediumUrgency,
+        low: lowUrgency
+      }
     });
   } catch (error) {
     console.error(error);

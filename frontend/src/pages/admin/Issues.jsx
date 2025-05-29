@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchIssues } from "../../services/issueService";
 import { authService } from "../../services/authService";
+import { useLocation } from "react-router-dom";
 import Filters from "../../components/Issues/Filters";
 import IssuesTable from "../../components/Issues/IssuesTable";
 import IssueModal from "../../components/Issues/IssuesModal";
@@ -12,8 +13,20 @@ const Issues = () => {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const location = useLocation();
   const userRole = authService.getRole();
+
+  useEffect(() => {
+    // Check if we have filters from navigation
+    if (location.state?.filters) {
+      const { status, resolution } = location.state.filters;
+      setFilters(prev => ({
+        ...prev,
+        status: status || "",
+        resolution: resolution || ""
+      }));
+    }
+  }, [location]);
 
   useEffect(() => {
     const getIssues = async () => {
@@ -55,6 +68,9 @@ const Issues = () => {
       return (urgencyPriority[a.urgency] ?? 99) - (urgencyPriority[b.urgency] ?? 99);
     });
 
+  if (loading) return <PageLoader />;
+  if (error) return <p className="text-center text-red-600">{error}</p>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-6 pt-20 transition-all duration-300">
       <div className="max-w-6xl mx-auto">
@@ -62,30 +78,14 @@ const Issues = () => {
           All Issues
         </h2>
 
-        {loading && (
-          <div className="flex justify-center mt-20">
-            <PageLoader />
+        <Filters filters={filters} setFilters={setFilters} />
+
+        {filteredIssues.length === 0 ? (
+          <div className="text-center text-gray-600 mt-16 text-lg italic">
+            No issues match the selected filters.
           </div>
-        )}
-
-        {!loading && error && (
-          <div className="text-red-600 text-center text-lg font-semibold p-4 bg-red-100 border border-red-300 rounded-xl shadow-md max-w-xl mx-auto">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <>
-            <Filters filters={filters} setFilters={setFilters} />
-
-            {filteredIssues.length === 0 ? (
-              <div className="text-center text-gray-600 mt-16 text-lg italic">
-                No issues match the selected filters.
-              </div>
-            ) : (
-              <IssuesTable issues={filteredIssues} openModal={setSelectedIssue} />
-            )}
-          </>
+        ) : (
+          <IssuesTable issues={filteredIssues} openModal={setSelectedIssue} />
         )}
 
         {selectedIssue && (
