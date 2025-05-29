@@ -224,7 +224,7 @@ const getAllEmployees = async (req, res) => {
   }
 };
 
-// Get employee by ID
+// Get employee by ID (admin only)
 const getEmployeeById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -304,6 +304,60 @@ const searchEmployees = async (req, res) => {
   }
 };
 
+// Get my profile (authenticated employee)
+const getMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    console.log('Fetching profile for user ID:', userId);
+
+    const user = await User.findById(userId)
+      .select('-password'); // Exclude password from the response
+
+    if (!user) {
+      console.log('User not found');
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    console.log('Profile found for:', user.email);
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    if (error.kind === 'ObjectId') {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
+    res.status(500).json({ message: 'Error fetching profile' });
+  }
+};
+
+// Update password (authenticated user)
+const updatePassword = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ message: 'Error updating password' });
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -313,5 +367,7 @@ module.exports = {
   createUser,
   getAllEmployees,
   getEmployeeById,
-  searchEmployees
+  searchEmployees,
+  getMyProfile,
+  updatePassword
 }; 

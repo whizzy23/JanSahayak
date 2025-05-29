@@ -10,7 +10,9 @@ const {
   createUser,
   getAllEmployees,
   getEmployeeById,
-  searchEmployees
+  searchEmployees,
+  getMyProfile,
+  updatePassword
 } = require('../controllers/authController');
 
 // Public routes
@@ -19,13 +21,17 @@ router.post('/login', login);
 
 // Protected routes (admin only)
 router.get('/users', adminAuth, getAllUsers);
+router.post('/users', adminAuth, createUser);
 router.post('/verify-user/:userId', adminAuth, verifyUser);
 router.delete('/users/:userId', adminAuth, removeUser);
-router.post('/users', adminAuth, createUser);
 
 // Employee routes (admin only)
 router.get('/employees', adminAuth, getAllEmployees);
 router.get('/employees/search', adminAuth, searchEmployees);
 router.get('/employees/:id', adminAuth, getEmployeeById);
+
+// Employee routes (authenticated)
+router.get('/profile', auth, getMyProfile);
+router.put('/profile/password', auth, updatePassword);
 
 module.exports = router;

@@ -76,6 +76,69 @@ export const authService = {
     }
   },
 
+  async getEmployeeById(id) {
+    try {
+      const token = this.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.get(`/auth/employees/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('getEmployeeById error:', error.response || error);
+      const message = error.response?.data?.error || error.message || 'Failed to fetch employee details';
+      throw new Error(message);
+    }
+  },
+
+  async getMyProfile() {
+    try {
+      const token = this.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.get('/auth/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('getMyProfile error:', error.response || error);
+      const message = error.response?.data?.error || error.message || 'Failed to fetch profile';
+      throw new Error(message);
+    }
+  },
+
+  async updatePassword(currentPassword, newPassword) {
+    try {
+      const token = this.getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.put('/auth/profile/password', 
+        { currentPassword, newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('updatePassword error:', error.response || error);
+      const message = error.response?.data?.message || error.message || 'Failed to update password';
+      throw new Error(message);
+    }
+  },
+
   async verifyUser(userId) {
     try {
       const token = this.getToken();
