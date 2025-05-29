@@ -8,13 +8,4 @@ export default defineConfig({
     include: /\.(js|jsx)$/,
     loader: 'jsx',
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5500',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
-  },
 })
