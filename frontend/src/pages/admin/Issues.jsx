@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchIssues } from "../../services/issueService";
+import { authService } from "../../services/authService";
 import Filters from "../../components/Issues/Filters";
 import IssuesTable from "../../components/Issues/IssuesTable";
 import IssueModal from "../../components/Issues/IssuesModal";
@@ -7,21 +8,22 @@ import PageLoader from "../../components/Loader";
 
 const Issues = () => {
   const [issues, setIssues] = useState([]);
-  const [filters, setFilters] = useState({ dept: "", status: "", date: "" });
+  const [filters, setFilters] = useState({ dept: "", status: "", resolution: "", date: "" });
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const userRole = authService.getRole();
 
   useEffect(() => {
     const getIssues = async () => {
       try {
         const response = await fetchIssues();
         setIssues(response);
-        setLoading(false);
         setError("");
       } catch (error) {
         console.error("Error fetching issues:", error);
-        setError("Failed to load issues. Please try again later.");
+        setError("⚠️ Failed to load issues. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -29,36 +31,72 @@ const Issues = () => {
     getIssues();
   }, []);
 
-  const filteredIssues = issues.filter((issue) => {
-    const matchesDept = !filters.dept || issue.department === filters.dept;
-    const matchesStatus = !filters.status || issue.status === filters.status;
+  const filteredIssues = issues
+    .filter((issue) => {
+      const matchesDept = !filters.dept || issue.department === filters.dept;
+      const matchesStatus = !filters.status || issue.status === filters.status;
+      const matchesResolution =
+        !filters.resolution || issue.resolution?.toLowerCase() === filters.resolution.toLowerCase();
 
-    const formatDate = (dateString) =>
-      new Date(dateString).toISOString().split("T")[0];
-    const matchesDate =
-      !filters.date || formatDate(issue.timestamp) === filters.date;
+      const formatDate = (dateString) =>
+        new Date(dateString).toISOString().split("T")[0];
+      const matchesDate =
+        !filters.date || formatDate(issue.timestamp) === filters.date;
 
-    return matchesDept && matchesStatus && matchesDate;
-  });
+      return matchesDept && matchesStatus && matchesResolution && matchesDate;
+    })
+    .sort((a, b) => {
+      const statusPriority = { Pending: 0, Assigned: 1, Closed: 2 };
+      const urgencyPriority = { High: 0, Medium: 1, Low: 2 };
 
-  if (loading) return <PageLoader />;
-  if (error) return <p className="text-red-600 text-center">{error}</p>;  
+      const statusDiff = (statusPriority[a.status] ?? 99) - (statusPriority[b.status] ?? 99);
+      if (statusDiff !== 0) return statusDiff;
+
+      return (urgencyPriority[a.urgency] ?? 99) - (urgencyPriority[b.urgency] ?? 99);
+    });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <h2 className="text-4xl font-bold mb-8 text-center text-blue-700">
-        All Issues
-      </h2>
-      <Filters filters={filters} setFilters={setFilters} />
-      <IssuesTable issues={filteredIssues} openModal={setSelectedIssue} />
-      {selectedIssue && (
-        <IssueModal
-          issue={selectedIssue}
-          onClose={() => setSelectedIssue(null)}
-          setIssues={setIssues}
-          issues={issues}
-        />
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-6 pt-20 transition-all duration-300">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-4xl font-bold mb-8 text-center text-blue-700 drop-shadow-md">
+          All Issues
+        </h2>
+
+        {loading && (
+          <div className="flex justify-center mt-20">
+            <PageLoader />
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="text-red-600 text-center text-lg font-semibold p-4 bg-red-100 border border-red-300 rounded-xl shadow-md max-w-xl mx-auto">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
+            <Filters filters={filters} setFilters={setFilters} />
+
+            {filteredIssues.length === 0 ? (
+              <div className="text-center text-gray-600 mt-16 text-lg italic">
+                No issues match the selected filters.
+              </div>
+            ) : (
+              <IssuesTable issues={filteredIssues} openModal={setSelectedIssue} />
+            )}
+          </>
+        )}
+
+        {selectedIssue && (
+          <IssueModal
+            issue={selectedIssue}
+            onClose={() => setSelectedIssue(null)}
+            setIssues={setIssues}
+            userRole={userRole}
+          />
+        )}
+      </div>
     </div>
   );
 };

@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 // GET all issues /api/issues
 getAllIssues = async (req, res) => {
   try {
-    const issues = await Issue.find().sort({ timestamp: -1 });
+    const issues = await Issue.find().sort({ timestamp: -1 }).populate("assignedTo", "name");
     res.json(issues);
   } catch (err) {
     res.status(500).json({ error: "Server error while fetching issues." });
@@ -22,10 +22,7 @@ const getAllIssueOfEmployee = async (req, res) => {
   }
 
   try {
-    const issues = await Issue.find({ assignedTo: employeeId }).populate(
-      "assignedTo",
-      "name email"
-    );
+    const issues = await Issue.find({ assignedTo: employeeId }).populate("assignedTo", "name");
 
     if (!issues.length) {
       return res
@@ -43,7 +40,7 @@ const getAllIssueOfEmployee = async (req, res) => {
 // GET particular issue /api/issues/:ticketId
 getIssueById = async (req, res) => {
   try {
-    const issue = await Issue.findOne({ ticketId: req.params.ticketId });
+    const issue = await Issue.findOne({ ticketId: req.params.ticketId }).populate("assignedTo", "name");
     if (!issue) return res.status(404).json({ error: "Issue not found." });
     res.json(issue);
   } catch (err) {
@@ -112,11 +109,12 @@ const assignIssue = async (req, res) => {
         return res.status(404).json({ error: "Employee not found or invalid" });
       }
 
-      issue.assignedTo = employeeId;
+      issue.assignedTo = employee._id;
       issue.status = "Assigned";
     }
 
     await issue.save();
+    await issue.populate('assignedTo', 'name _id');
 
     res.status(200).json({
       message: employeeId ? "Issue assigned successfully" : "Issue unassigned successfully",
@@ -162,7 +160,7 @@ const updateIssue = async (req, res) => {
       { ticketId: req.params.ticketId },
       { $set: updates },
       { new: true }
-    );
+    ).populate("assignedTo", "name _id");
 
     if (!issue) return res.status(404).json({ error: "Issue not found." });
     res.json(issue);

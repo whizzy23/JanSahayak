@@ -19,8 +19,10 @@ export const authService = {
   async login(email, password) {
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token, role: userRole, department: userDepartment } = response.data;
+      const { token, id, role: userRole, department: userDepartment } = response.data;
 
+      localStorage.setItem('id', id);
+      localStorage.setItem('email', email);
       localStorage.setItem('token', token);
       localStorage.setItem('role', userRole);
       if (userDepartment) {

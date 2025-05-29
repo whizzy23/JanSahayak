@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { updateIssue, assignIssue } from "../../services/issueService";
 import { authService } from "../../services/authService";
-import ImageViewer from "./ImageViewer";
+import ImageViewer from "./ImageViewer"; // KEEP THIS IMPORT
 import { AiOutlineClose } from "react-icons/ai";
 import toast from "react-hot-toast";
 
@@ -22,7 +22,7 @@ const fieldOptionsMap = {
   resolution: ["Resolved", "Unresolved"],
 };
 
-const editableFields = [
+const editableFieldsAdmin = [
   "status",
   "urgency",
   "department",
@@ -32,14 +32,22 @@ const editableFields = [
   "resolutionDate",
 ];
 
+const editableFieldsEmployee = ["resolution", "comments", "resolutionDate"];
+
 const capitalize = (str = "") => str.charAt(0).toUpperCase() + str.slice(1);
 
-const IssueModal = ({ issue, onClose, setIssues }) => {
+const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
   const [employees, setEmployees] = useState([]);
   const [currentIssue, setCurrentIssue] = useState(issue);
   const [isEditing, setIsEditing] = useState(false);
   const [editField, setEditField] = useState("");
   const [editValue, setEditValue] = useState("");
+  const isEditingAllowed = !(
+    userRole === "employee" && currentIssue.status === "Closed"
+  );
+
+  const editableFields =
+    userRole === "employee" ? editableFieldsEmployee : editableFieldsAdmin;
 
   const handleChangeField = async () => {
     if (!editField) return;
@@ -47,11 +55,10 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
     try {
       const trimmedValue = editValue.trim();
 
-      // Validate locally only if status = "Closed"
       if (
         editField === "status" &&
         trimmedValue === "Closed" &&
-        currentIssue.resolution === "resolved" &&
+        currentIssue.resolution?.toLowerCase() !== "resolved" &&
         !currentIssue.resolutionDate
       ) {
         toast.error("Please provide resolution date before closing the issue.");
@@ -60,7 +67,6 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
 
       let updateData = {};
 
-      // Handle assignment separately
       if (editField === "assignedTo") {
         const employeeId =
           trimmedValue === "null" || trimmedValue === "" ? null : trimmedValue;
@@ -74,22 +80,19 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
         updateData = {
           ...currentIssue,
           status: employeeId ? "Assigned" : "Pending",
-          assignedTo: assignedEmployee ? assignedEmployee.name : null,
+          assignedTo: assignedEmployee || null,
         };
       } else {
-        // For all other fields
         const fieldUpdate = { [editField]: trimmedValue };
         const result = await updateIssue(issue.ticketId, fieldUpdate);
         updateData = { ...currentIssue, ...result };
       }
 
-      // Update local state
       setCurrentIssue(updateData);
       setIssues((prev) =>
         prev.map((i) => (i.ticketId === updateData.ticketId ? updateData : i))
       );
 
-      // Reset UI state
       setIsEditing(false);
       setEditField("");
       setEditValue("");
@@ -136,7 +139,7 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur flex items-center justify-center p-4">
-      <div className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 hover:text-red-500 z-20 cursor-pointer"
@@ -145,13 +148,13 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
           <AiOutlineClose size={24} />
         </button>
 
-        <div className="overflow-y-auto px-6 pt-6 pb-8 max-h-[calc(90vh-3rem)] hide-scrollbar">
-          <h2 className="text-3xl font-semibold mb-6 text-blue-700 border-b pb-3">
+        <div className="overflow-y-auto px-8 pt-8 pb-10 max-h-[calc(90vh-3rem)] hide-scrollbar text-gray-900 font-sans">
+          <h2 className="text-3xl font-bold mb-8 text-blue-700 border-b border-blue-200 pb-4">
             Issue Details
           </h2>
 
-          <div className="space-y-4 text-gray-800 text-sm">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          <div className="space-y-6 text-sm">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4 font-medium">
               <div>
                 <strong>Ticket ID:</strong> {currentIssue.ticketId}
               </div>
@@ -169,7 +172,7 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
               </div>
               <div>
                 <strong>Assigned To:</strong>{" "}
-                {currentIssue.assignedTo || "Not assigned"}
+                {currentIssue.assignedTo?.name || "Not assigned"}
               </div>
               <div>
                 <strong>Resolution:</strong>{" "}
@@ -178,16 +181,10 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
               <div>
                 <strong>Resolution Date:</strong>{" "}
                 {currentIssue.resolutionDate
-                  ? new Date(currentIssue.resolutionDate).toISOString().split("T")[0]
+                  ? new Date(currentIssue.resolutionDate)
+                      .toISOString()
+                      .split("T")[0]
                   : "N/A"}
-              </div>
-              <div>
-                <strong>Image:</strong>{" "}
-                {currentIssue.imageUrl ? (
-                  <ImageViewer imageUrl={currentIssue.imageUrl} />
-                ) : (
-                  "N/A"
-                )}
               </div>
               <div>
                 <strong>Date Reported:</strong>{" "}
@@ -199,25 +196,47 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
               </div>
             </div>
 
-            <div>
-              <strong>Description:</strong>
-              <p className="mt-1">{currentIssue.description || "N/A"}</p>
-            </div>
+            {/* Description, Comments + Image side by side */}
+            <div className="flex gap-10">
+              <div className="flex-1 space-y-6">
+                <div>
+                  <strong>Description:</strong>
+                  <p className="mt-2 text-gray-700 leading-relaxed">
+                    {currentIssue.description || "N/A"}
+                  </p>
+                </div>
 
-            <div>
-              <strong>Comments:</strong>
-              <p className="mt-1">{currentIssue.comments || "None"}</p>
+                <div>
+                  <strong>Comments:</strong>
+                  <p className="mt-2 text-gray-700 leading-relaxed">
+                    {currentIssue.comments || "None"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-64 flex-shrink-0 rounded-lg overflow-hidden shadow-md border border-gray-200">
+                <strong className="block px-3 pt-2 text-gray-600">Image</strong>
+                <div className="p-3">
+                  {currentIssue.imageUrl ? (
+                    <ImageViewer imageUrl={currentIssue.imageUrl} />
+                  ) : (
+                    <div className="text-center text-gray-400 italic mt-10">
+                      N/A
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 space-y-3">
-            {isEditing && (
-              <div className="bg-gray-100 p-4 rounded-md space-y-4">
-                <label className="block text-sm font-medium text-gray-700">
+          <div className="mt-8 space-y-4">
+            {isEditing && isEditingAllowed && (
+              <div className="bg-gray-50 p-5 rounded-lg border border-gray-200 space-y-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
                   Select Field
                 </label>
                 <select
-                  className="w-full p-2 border rounded-md cursor-pointer"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
                   value={editField}
                   onChange={(e) => {
                     const sel = e.target.value;
@@ -230,10 +249,7 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
                           ? new Date(existing).toISOString().split("T")[0]
                           : "";
                       } else if (sel === "assignedTo") {
-                        const emp = employees.find(
-                          (emp) => emp.name === existing
-                        );
-                        init = emp?._id || "";
+                        init = existing?._id || "";
                       } else {
                         init = existing || "";
                       }
@@ -254,7 +270,7 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
                 {editField &&
                   (fieldOptionsMap[editField] ? (
                     <select
-                      className="w-full p-2 border rounded-md cursor-pointer"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 cursor-pointer"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                     >
@@ -269,7 +285,7 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
                     </select>
                   ) : editField === "assignedTo" ? (
                     <select
-                      className="w-full p-2 border rounded-md cursor-pointer"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 cursor-pointer"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                       size={6}
@@ -285,13 +301,13 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
                   ) : editField === "resolutionDate" ? (
                     <input
                       type="date"
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                     />
                   ) : (
                     <textarea
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
                       rows={3}
                       placeholder={`Enter ${capitalize(editField)}`}
                       value={editValue}
@@ -301,29 +317,37 @@ const IssueModal = ({ issue, onClose, setIssues }) => {
               </div>
             )}
 
-            <button
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md font-semibold cursor-pointer"
-              onClick={() => {
-                if (isEditing) {
-                  setIsEditing(false);
-                  setEditField("");
-                  setEditValue("");
-                } else {
-                  setIsEditing(true);
-                }
-              }}
-            >
-              {isEditing ? "Cancel Editing" : "Edit Field"}
-            </button>
-
-            {isEditing && (
+            {isEditingAllowed && (
               <button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold disabled:opacity-50 cursor-pointer"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-md font-semibold"
+                onClick={() => {
+                  if (isEditing) {
+                    setIsEditing(false);
+                    setEditField("");
+                    setEditValue("");
+                  } else {
+                    setIsEditing(true);
+                  }
+                }}
+              >
+                {isEditing ? "Cancel Editing" : "Edit Field"}
+              </button>
+            )}
+
+            {isEditing && isEditingAllowed && (
+              <button
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-md font-semibold disabled:opacity-50"
                 disabled={!editValue.trim()}
                 onClick={handleChangeField}
               >
                 Save Changes
               </button>
+            )}
+
+            {!isEditingAllowed && (
+              <p className="text-center text-gray-500 italic">
+                This issue is closed.
+              </p>
             )}
           </div>
         </div>
