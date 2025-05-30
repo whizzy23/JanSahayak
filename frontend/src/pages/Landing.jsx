@@ -94,7 +94,7 @@ const Landing = () => {
                 </h3>
                 <div className="bg-white p-4 rounded-lg shadow-lg">
                   <img
-                    src="/assets/qr.jpg"
+                    src="/assets/qr.svg"
                     alt="WhatsApp QR Code"
                     className="w-full max-w-[300px] mx-auto rounded-lg"
                   />
