@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { updateIssue, assignIssue } from "../../services/issueService";
 import { authService } from "../../services/authService";
-import ImageViewer from "./ImageViewer"; // KEEP THIS IMPORT
+import ImageViewer from "./ImageViewer";
+import CustomSelect from "./CustomSelect";
 import { AiOutlineClose } from "react-icons/ai";
 import toast from "react-hot-toast";
 
@@ -229,17 +230,16 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
             </div>
           </div>
 
-          <div className="mt-8 space-y-4">
+          <div className="mt-8 space-y-4 pb-12">
             {isEditing && isEditingAllowed && (
               <div className="bg-gray-50 p-5 rounded-lg border border-gray-200 space-y-4">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
                   Select Field
                 </label>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                <CustomSelect
                   value={editField}
-                  onChange={(e) => {
-                    const sel = e.target.value;
+                  onChange={(val) => {
+                    const sel = val;
                     let init = "";
 
                     if (sel) {
@@ -258,46 +258,37 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
                     setEditField(sel);
                     setEditValue(init);
                   }}
-                >
-                  <option value="">Select Field to Edit</option>
-                  {editableFields.map((f) => (
-                    <option key={f} value={f}>
-                      {capitalize(f)}
-                    </option>
-                  ))}
-                </select>
+                  options={editableFields.map((f) => ({
+                    value: f,
+                    label: capitalize(f),
+                  }))}
+                  placeholder="Select Field to Edit"
+                />
 
                 {editField &&
                   (fieldOptionsMap[editField] ? (
-                    <select
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                    <CustomSelect
                       value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                    >
-                      <option value="">{`Select ${capitalize(
-                        editField
-                      )}`}</option>
-                      {fieldOptionsMap[editField].map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setEditValue(val)}
+                      options={fieldOptionsMap[editField].map((opt) => ({
+                        value: opt,
+                        label: opt,
+                      }))}
+                      placeholder={`Select ${capitalize(editField)}`}
+                    />
                   ) : editField === "assignedTo" ? (
-                    <select
-                      className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                    <CustomSelect
                       value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      size={6}
-                    >
-                      <option value="">Select Employee</option>
-                      <option value="null">None (Unassign)</option>
-                      {employees.map((emp) => (
-                        <option key={emp._id} value={emp._id}>
-                          {emp.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setEditValue(val)}
+                      options={[
+                        { value: "null", label: "None (Unassign)" },
+                        ...employees.map((emp) => ({
+                          value: emp._id,
+                          label: emp.name,
+                        })),
+                      ]}
+                      placeholder="Select Employee"
+                    />
                   ) : editField === "resolutionDate" ? (
                     <input
                       type="date"
