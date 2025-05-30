@@ -13,6 +13,8 @@ const Auth = ({ onAuthSuccess }) => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,21 +24,25 @@ const Auth = ({ onAuthSuccess }) => {
     try {
       if (isLogin) {
         await authService.login(formData.email, formData.password);
+        onAuthSuccess();
       } else {
         if (formData.role === 'employee' && !formData.department) {
           setError('Please select a department');
           setLoading(false);
           return;
         }
-        await authService.register(
+
+        const data = await authService.signup(
           formData.name,
           formData.email,
           formData.password,
           formData.role,
           formData.department || ''
         );
+
+        setPendingMessage(data.message || 'Your account is pending verification.');
+        setPendingVerification(true);
       }
-      onAuthSuccess();
     } catch (err) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -47,6 +53,39 @@ const Auth = ({ onAuthSuccess }) => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  if (pendingVerification) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-200 via-blue-100 to-blue-300 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md bg-white/95 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-blue-300 text-center"
+        >
+          <h2 className="text-3xl font-bold text-blue-900 mb-4">Account Pending Verification</h2>
+          <p className="text-gray-700 mb-6">{pendingMessage}</p>
+          <button
+            onClick={() => {
+              setPendingVerification(false);
+              setIsLogin(true);
+              setFormData({
+                name: '',
+                email: '',
+                password: '',
+                department: '',
+                role: 'employee'
+              });
+              setError('');
+            }}
+            className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          >
+            Back to Login
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 via-blue-100 to-blue-300 flex items-center justify-center p-4">
@@ -62,7 +101,7 @@ const Auth = ({ onAuthSuccess }) => {
               {isLogin ? 'Welcome Back' : 'Create Account'}
             </h2>
             <p className="text-gray-600">
-              {isLogin ? 'Sign in to manage grievances' : 'Join our municipal team'}
+              {isLogin ? 'Sign in to manage grievances' : 'Join our team'}
             </p>
           </div>
 
@@ -76,7 +115,6 @@ const Auth = ({ onAuthSuccess }) => {
             </motion.div>
           )}
 
-          {/* Test credentials note (only shown in login mode) */}
           {isLogin && (
             <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg mb-6">
               <p className="font-semibold mb-2">For testing use:</p>
@@ -111,7 +149,7 @@ const Auth = ({ onAuthSuccess }) => {
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 cursor-pointer"
                   >
                     <option value="employee">Employee</option>
                     <option value="admin">Administrator</option>
@@ -126,7 +164,7 @@ const Auth = ({ onAuthSuccess }) => {
                       value={formData.department}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 cursor-pointer"
                     >
                       <option value="">Select Department</option>
                       <option value="Water">Water</option>
@@ -183,7 +221,19 @@ const Auth = ({ onAuthSuccess }) => {
 
           <div className="mt-6 text-center">
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin)
+                setError('');
+                setPendingVerification(false);
+                setPendingMessage('');
+                setFormData({
+                  name: '',
+                  email: '',
+                  password: '',
+                  department: '',
+                  role: 'employee'
+                });
+              }}
               className="text-blue-600 hover:text-blue-700 transition-colors duration-300 cursor-pointer"
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
@@ -195,4 +245,4 @@ const Auth = ({ onAuthSuccess }) => {
   );
 };
 
-export default Auth; 
+export default Auth;
