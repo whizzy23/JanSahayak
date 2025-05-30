@@ -7,6 +7,10 @@ load_dotenv()
 
 app = Flask(__name__)
 
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "Issue classification service is up and running!"})
+
 @app.route("/classify", methods=["POST"])
 def classify():
     data = request.get_json()
