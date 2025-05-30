@@ -5,6 +5,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useEffect, useState } from 'react';
 
 const COLORS = [
   'rgba(0, 123, 255, 0.8)',  // Blue
@@ -36,20 +37,27 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   if (percent < 0.03) return null; // Skip tiny labels
 
   const RADIAN = Math.PI / 180;
-  const pieX = cx + (outerRadius + 10) * Math.cos(-midAngle * RADIAN);
-  const pieY = cy + (outerRadius + 10) * Math.sin(-midAngle * RADIAN);
-  const radius = outerRadius + 90;
+  const pieX = cx + (outerRadius + 3) * Math.cos(-midAngle * RADIAN);
+  const pieY = cy + (outerRadius + 3) * Math.sin(-midAngle * RADIAN);
+  const radius = outerRadius + (window.innerWidth < 640 ? 20 : window.innerWidth < 1024 ? 40 : 50);
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  const controlX = (pieX + x) / 2;
-  const controlY = (pieY + y) / 2;
+
+  // Calculate two control points very close to the midpoint for a nearly straight line
+  const midX = (pieX + x) / 2;
+  const midY = (pieY + y) / 2;
+  const tinyCurve = 4; // Small offset for a very slight curve
+  const controlX1 = midX + tinyCurve * Math.cos(-midAngle * RADIAN + Math.PI/2);
+  const controlY1 = midY + tinyCurve * Math.sin(-midAngle * RADIAN + Math.PI/2);
+  const controlX2 = midX - tinyCurve * Math.cos(-midAngle * RADIAN + Math.PI/2);
+  const controlY2 = midY - tinyCurve * Math.sin(-midAngle * RADIAN + Math.PI/2);
 
   return (
     <g>
       <path
-        d={`M${pieX},${pieY} Q${controlX},${controlY} ${x},${y}`}
+        d={`M${pieX},${pieY} C${controlX1},${controlY1} ${controlX2},${controlY2} ${x},${y}`}
         stroke={COLORS[index % COLORS.length]}
-        strokeWidth={2}
+        strokeWidth={1.5}
         fill="none"
         className="transition-all duration-300"
         style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))' }}
@@ -57,16 +65,16 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
       <circle
         cx={x}
         cy={y}
-        r={4}
+        r={2.5}
         fill={COLORS[index % COLORS.length]}
         style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))' }}
       />
       <text
-        x={x + (x > cx ? 10 : -10)}
+        x={x + (x > cx ? 4 : -4)}
         y={y}
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
-        className="text-xs font-medium fill-blue-900"
+        className="text-[10px] sm:text-xs font-medium fill-blue-900"
         style={{ filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1))' }}
       >
         {name}
@@ -75,8 +83,29 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
-
 export default function PieChart({ data }) {
+  const [outerRadius, setOuterRadius] = useState(160);
+  const [innerRadius, setInnerRadius] = useState(80);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) { // sm breakpoint
+        setOuterRadius(60);
+        setInnerRadius(30);
+      } else if (window.innerWidth < 1024) { // lg breakpoint
+        setOuterRadius(120);
+        setInnerRadius(60);
+      } else {
+        setOuterRadius(160);
+        setInnerRadius(80);
+      }
+    };
+
+    handleResize(); // Initial call
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const safeData = Array.isArray(data)
     ? data
     : data && typeof data === 'object'
@@ -97,8 +126,8 @@ export default function PieChart({ data }) {
             data={safeData}
             cx="50%"
             cy="50%"
-            innerRadius={80}
-            outerRadius={160}
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
             fill="#8884d8"
             dataKey="value"
             paddingAngle={2}

@@ -94,20 +94,20 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-6 mt-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-4 sm:p-6 mt-16">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-4xl font-extrabold text-blue-900">
+        <div className="flex justify-between items-center mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-900">
             Admin Dashboard
           </h2>
         </div>
 
         {/* Statistics Overview */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <StatCard
             title="Total Issues"
             value={stats?.total || 0}
-            icon={<ClipboardList className="w-6 h-6" />}
+            icon={<ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />}
             className="bg-gradient-to-br from-slate-50 to-white hover:from-slate-100 hover:to-slate-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('total')}
             isHovered={hoveredStat === 'total'}
@@ -116,7 +116,7 @@ export default function Dashboard() {
           <StatCard
             title="Assigned Issues"
             value={stats?.assigned || 0}
-            icon={<UserCheck className="w-6 h-6" />}
+            icon={<UserCheck className="w-5 h-5 sm:w-6 sm:h-6" />}
             className="bg-gradient-to-br from-cyan-50 to-white hover:from-cyan-100 hover:to-cyan-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('assigned')}
             isHovered={hoveredStat === 'assigned'}
@@ -125,7 +125,7 @@ export default function Dashboard() {
           <StatCard
             title="Pending Issues"
             value={stats?.pending || 0}
-            icon={<Clock className="w-6 h-6" />}
+            icon={<Clock className="w-5 h-5 sm:w-6 sm:h-6" />}
             className="bg-gradient-to-br from-yellow-50 to-white hover:from-yellow-100 hover:to-yellow-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('pending')}
             isHovered={hoveredStat === 'pending'}
@@ -134,7 +134,7 @@ export default function Dashboard() {
           <StatCard
             title="Resolved Issues"
             value={stats?.resolved || 0}
-            icon={<CheckCircle className="w-6 h-6" />}
+            icon={<CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
             className="bg-gradient-to-br from-green-50 to-white hover:from-green-100 hover:to-green-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('resolved')}
             isHovered={hoveredStat === 'resolved'}
@@ -143,7 +143,7 @@ export default function Dashboard() {
           <StatCard
             title="Unresolved Issues"
             value={stats?.unresolved || 0}
-            icon={<XCircle className="w-6 h-6" />}
+            icon={<XCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
             className="bg-gradient-to-br from-red-50 to-white hover:from-red-100 hover:to-red-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('unresolved')}
             isHovered={hoveredStat === 'unresolved'}
@@ -152,7 +152,7 @@ export default function Dashboard() {
           <StatCard
             title="Closed Issues"
             value={stats?.closed || 0}
-            icon={<Archive className="w-6 h-6" />}
+            icon={<Archive className="w-5 h-5 sm:w-6 sm:h-6" />}
             className="bg-gradient-to-br from-purple-50 to-white hover:from-purple-100 hover:to-purple-50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
             onHover={() => setHoveredStat('closed')}
             isHovered={hoveredStat === 'closed'}
@@ -161,28 +161,30 @@ export default function Dashboard() {
         </section>
 
         {/* Charts and Analytics */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
-            <h3 className="text-2xl font-semibold text-blue-900 mb-6 border-b border-blue-100 pb-3">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6 mb-5 sm:mb-6 lg:mb-8">
+          <div className="bg-white/80 backdrop-blur-sm p-2 sm:p-5 lg:p-8 rounded-md sm:rounded-xl lg:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
+            <h3 className="text-sm sm:text-lg lg:text-2xl font-semibold text-blue-900 mb-2 sm:mb-3 lg:mb-6 border-b border-blue-100 pb-1 sm:pb-2 lg:pb-3">
               Issues by Department
             </h3>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-xl" />
-              <div className="p-4 min-h-[280px]">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-md sm:rounded-xl" />
+              <div className="p-0.5 sm:p-2 lg:p-4 min-h-[60px] sm:min-h-[200px] lg:min-h-[280px]">
                 <PieChart
-                  data={Object.entries(stats.byDepartment).map(([name, value]) => ({ name, value }))}
+                  data={Object.entries(stats.byDepartment)
+                    .filter(([_, value]) => value > 0)
+                    .map(([name, value]) => ({ name, value }))}
                 />
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
-            <h3 className="text-2xl font-semibold text-blue-900 mb-6 border-b border-blue-100 pb-3">
+          <div className="bg-white/80 backdrop-blur-sm p-2 sm:p-5 lg:p-8 rounded-md sm:rounded-xl lg:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
+            <h3 className="text-sm sm:text-lg lg:text-2xl font-semibold text-blue-900 mb-2 sm:mb-3 lg:mb-6 border-b border-blue-100 pb-1 sm:pb-2 lg:pb-3">
               Issues by Urgency
             </h3>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-xl" />
-              <div className="p-4 min-h-[280px]">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-md sm:rounded-xl" />
+              <div className="p-1 sm:p-2 lg:p-4 min-h-[80px] sm:min-h-[200px] lg:min-h-[280px]">
                 <BarChart data={urgencyData} />
               </div>
             </div>
@@ -190,16 +192,16 @@ export default function Dashboard() {
         </section>
 
         {/* Municipal Corporations Section */}
-        <section className="mb-8">
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
-            <h3 className="text-2xl font-semibold text-blue-900 mb-6 border-b border-blue-100 pb-3">
+        <section className="mb-5 sm:mb-6 lg:mb-8">
+          <div className="bg-white/80 backdrop-blur-sm p-3 sm:p-5 lg:p-8 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-[1.02] border border-blue-100">
+            <h3 className="text-base sm:text-lg lg:text-2xl font-semibold text-blue-900 mb-2.5 sm:mb-3 lg:mb-6 border-b border-blue-100 pb-1.5 sm:pb-2 lg:pb-3">
               Municipal Corporations in Madhya Pradesh
             </h3>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-xl" />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white/30 rounded-lg sm:rounded-xl" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-8">
                 {/* Map Section */}
-                <div className="h-[500px] bg-blue-50 rounded-lg p-4 relative group overflow-hidden">
+                <div className="h-[250px] sm:h-[350px] lg:h-[500px] bg-blue-50 rounded-lg p-2 sm:p-3 lg:p-4 relative group overflow-hidden">
                   <img 
                     src="/assets/mp.avif" 
                     alt="Madhya Pradesh Map" 
@@ -207,38 +209,40 @@ export default function Dashboard() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/10 group-hover:to-blue-500/20 transition-all duration-300 rounded-lg" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
-                      <p className="text-blue-900 font-medium">Madhya Pradesh Municipal Corporations</p>
+                    <div className="bg-white/90 backdrop-blur-sm px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg shadow-lg">
+                      <p className="text-xs sm:text-sm lg:text-base text-blue-900 font-medium">Madhya Pradesh Municipal Corporations</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Corporations List */}
-                <div className="h-[500px] grid grid-rows-4 grid-cols-3 gap-4 overflow-y-auto p-2">
-                  {[
-                    "Bhopal Municipal Corporation",
-                    "Chhindwara Municipal Corporation",
-                    "Dewas Municipal Corporation",
-                    "Gwalior Municipal Corporation",
-                    "Indore Municipal Corporation",
-                    "Jabalpur Municipal Corporation",
-                    "Katni Municipal Corporation",
-                    "Khandwa Municipal Corporation",
-                    "Murwara Municipal Corporation",
-                    "Rewa Municipal Corporation",
-                    "Sagar Municipal Corporation",
-                    "Ujjain Municipal Corporation"
-                  ].map((corporation) => (
-                    <div
-                      key={corporation}
-                      className="bg-white/50 hover:bg-blue-50 p-3 rounded-lg transition-all duration-300 border border-blue-100 flex flex-col justify-center group cursor-pointer transform hover:scale-105 hover:shadow-lg hover:border-blue-300"
-                    >
-                      <div className="relative">
-                        <h4 className="text-sm font-semibold text-blue-900 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">{corporation}</h4>
-                        <p className="text-xs text-blue-600 mt-1 group-hover:text-blue-500 transition-colors duration-300">Active</p>
+                <div className="h-[250px] sm:h-[350px] lg:h-[500px] overflow-y-auto p-2 sm:p-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
+                    {[
+                      "Bhopal Municipal Corporation",
+                      "Chhindwara Municipal Corporation",
+                      "Dewas Municipal Corporation",
+                      "Gwalior Municipal Corporation",
+                      "Indore Municipal Corporation",
+                      "Jabalpur Municipal Corporation",
+                      "Katni Municipal Corporation",
+                      "Khandwa Municipal Corporation",
+                      "Murwara Municipal Corporation",
+                      "Rewa Municipal Corporation",
+                      "Sagar Municipal Corporation",
+                      "Ujjain Municipal Corporation"
+                    ].map((corporation) => (
+                      <div
+                        key={corporation}
+                        className="bg-white/50 hover:bg-blue-50 p-2 sm:p-2.5 lg:p-3 rounded-lg transition-all duration-300 border border-blue-100 flex flex-col justify-center group cursor-pointer transform hover:scale-105 hover:shadow-lg hover:border-blue-300"
+                      >
+                        <div className="relative">
+                          <h4 className="text-xs sm:text-sm lg:text-base font-semibold text-blue-900 line-clamp-2 group-hover:text-blue-700 transition-colors duration-300">{corporation}</h4>
+                          <p className="text-[10px] sm:text-xs lg:text-sm text-blue-600 mt-1 group-hover:text-blue-500 transition-colors duration-300">Active</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -249,27 +253,26 @@ export default function Dashboard() {
   );
 }
 
-// Enhanced Stat Card component
 function StatCard({ title, value, icon, className, onHover, isHovered, onClick }) {
   return (
-    <div 
-      className={`bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition duration-200 cursor-pointer ${className}`}
+    <div
+      className={`relative p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg transition-all duration-300 cursor-pointer overflow-hidden ${className}`}
       onMouseEnter={onHover}
       onMouseLeave={() => onHover(null)}
       onClick={onClick}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-md font-semibold text-gray-600">{title}</h4>
-        <span className={`text-xl transition-transform duration-300 ${isHovered ? 'scale-110' : ''}`}>
-          {icon}
-        </span>
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-3 bg-white/60 rounded-lg backdrop-blur-sm">
+        {icon}
       </div>
-      <p className="text-4xl font-bold text-gray-900">{value}</p>
-      {isHovered && (
-        <div className="mt-2 text-sm text-gray-500">
-          Click to view details
+      <div className="flex flex-col justify-between h-full">
+        <div>
+          <p className="text-sm sm:text-base text-gray-600 mb-2 leading-tight font-semibold">{title}</p>
+          <p className="text-3xl sm:text-4xl font-bold text-black">{value}</p>
         </div>
-      )}
+        {isHovered && (
+          <p className="text-xs sm:text-sm text-gray-700 mt-auto leading-tight">Click to view details</p>
+        )}
+      </div>
     </div>
   );
 }

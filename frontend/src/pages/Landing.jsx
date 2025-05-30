@@ -114,9 +114,9 @@ const Landing = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="bg-blue-100 rounded-xl p-6 border border-blue-300 shadow-md"
+                className="bg-blue-100 rounded-xl p-3 sm:p-6 border border-blue-300 shadow-md text-sm sm:text-base"
               >
-                <h3 className="text-xl font-semibold text-blue-800 mb-3">
+                <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-2 sm:mb-3">
                   WhatsApp Integration
                 </h3>
                 <p className="text-gray-700">
@@ -127,9 +127,9 @@ const Landing = () => {
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="bg-blue-100 rounded-xl p-6 border border-blue-300 shadow-md"
+                className="bg-blue-100 rounded-xl p-3 sm:p-6 border border-blue-300 shadow-md text-sm sm:text-base"
               >
-                <h3 className="text-xl font-semibold text-blue-800 mb-3">
+                <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-2 sm:mb-3">
                   Employee Portal
                 </h3>
                 <p className="text-gray-700">
@@ -139,7 +139,7 @@ const Landing = () => {
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="bg-blue-100 rounded-xl p-6 border border-blue-300 shadow-md"
+                className="bg-blue-100 rounded-xl p-3 sm:p-6 border border-blue-300 shadow-md text-sm sm:text-base"
               >
                 <h3 className="text-xl font-semibold text-blue-800 mb-3">
                   Streamlined Process
