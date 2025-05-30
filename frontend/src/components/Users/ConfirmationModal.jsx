@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { AiOutlineClose } from "react-icons/ai";
 
-const ConfirmationModal = ({ isOpen, onCancel, onConfirm, title, message }) => {
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   // Prevent background scroll when open
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
@@ -19,7 +19,7 @@ const ConfirmationModal = ({ isOpen, onCancel, onConfirm, title, message }) => {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all duration-300 ease-out scale-95 animate-fadeIn">
         <button
-          onClick={onCancel}
+          onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
           aria-label="Close"
         >
@@ -33,7 +33,7 @@ const ConfirmationModal = ({ isOpen, onCancel, onConfirm, title, message }) => {
 
         <div className="flex justify-center space-x-4">
           <button
-            onClick={onCancel}
+            onClick={onClose}
             className="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 transition cursor-pointer"
           >
             Cancel
