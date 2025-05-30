@@ -54,17 +54,17 @@ export default function IssuesTable({ issues, openModal }) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-2xl shadow-xl ring-1 ring-blue-100">
-      <div className="overflow-x-auto rounded-xl">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-blue-200 text-blue-900 text-center uppercase text-xs tracking-wide rounded-t-xl">
+    <div className="bg-white p-1 sm:p-4 rounded-xl sm:rounded-2xl shadow-xl ring-1 ring-blue-100">
+      <div className="overflow-x-auto rounded-lg sm:rounded-xl">
+        <table className="w-full text-[10px] sm:text-sm text-left">
+          <thead className="bg-blue-200 text-blue-900 text-center uppercase text-[8px] sm:text-xs tracking-wide rounded-t-lg sm:rounded-t-xl">
             <tr>
-              <th className="px-5 py-3 rounded-tl-xl">ID</th>
-              <th className="px-5 py-3">Department</th>
-              <th className="px-5 py-3">Date</th>
-              <th className="px-5 py-3">Status</th>
-              <th className="px-5 py-3">Urgency</th>
-              <th className="px-5 py-3 rounded-tr-xl">Action</th>
+              <th className="px-1 sm:px-5 py-1.5 sm:py-3 rounded-tl-lg sm:rounded-tl-xl">ID</th>
+              <th className="px-1 sm:px-5 py-1.5 sm:py-3">Department</th>
+              <th className="px-1 sm:px-5 py-1.5 sm:py-3">Date</th>
+              <th className="px-1 sm:px-5 py-1.5 sm:py-3">Status</th>
+              <th className="px-1 sm:px-5 py-1.5 sm:py-3">Urgency</th>
+              <th className="px-1 sm:px-5 py-1.5 sm:py-3 rounded-tr-lg sm:rounded-tr-xl">Action</th>
             </tr>
           </thead>
           <tbody className="text-center">
@@ -75,18 +75,18 @@ export default function IssuesTable({ issues, openModal }) {
                   index % 2 === 0 ? "bg-blue-50" : "bg-white"
                 } hover:bg-blue-100`}
               >
-                <td className="px-5 py-4 font-semibold text-gray-800">{issue.ticketId}</td>
-                <td className="px-5 py-4">{issue.department}</td>
-                <td className="px-5 py-4">
+                <td className="px-1 sm:px-5 py-1.5 sm:py-4 font-semibold text-gray-800">{issue.ticketId}</td>
+                <td className="px-1 sm:px-5 py-1.5 sm:py-4">{issue.department}</td>
+                <td className="px-1 sm:px-5 py-1.5 sm:py-4">
                   {new Date(issue.timestamp).toLocaleDateString("en-IN", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
                   })}
                 </td>
-                <td className="px-5 py-4">
+                <td className="px-1 sm:px-5 py-1.5 sm:py-4">
                   <span
-                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
+                    className={`inline-flex items-center gap-0.5 sm:gap-2 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-medium ${getStatusStyle(
                       issue.status
                     )}`}
                   >
@@ -94,9 +94,9 @@ export default function IssuesTable({ issues, openModal }) {
                     {issue.status}
                   </span>
                 </td>
-                <td className="px-5 py-4">
+                <td className="px-1 sm:px-5 py-1.5 sm:py-4">
                   <span
-                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${getUrgencyStyle(
+                    className={`inline-flex items-center gap-0.5 sm:gap-2 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-xs font-medium ${getUrgencyStyle(
                       issue.urgency
                     )}`}
                   >
@@ -104,10 +104,10 @@ export default function IssuesTable({ issues, openModal }) {
                     {issue.urgency}
                   </span>
                 </td>
-                <td className="px-5 py-4">
+                <td className="px-1 sm:px-5 py-1.5 sm:py-4">
                   <button
                     onClick={() => openModal(issue)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-md transition cursor-pointer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-1.5 sm:px-4 py-0.5 sm:py-1.5 rounded-full text-[8px] sm:text-sm font-medium shadow-md transition cursor-pointer"
                   >
                     View
                   </button>

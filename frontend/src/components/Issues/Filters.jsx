@@ -1,9 +1,9 @@
 const Filters = ({ filters, setFilters }) => {
   return (
-    <div className="flex flex-wrap gap-4 mb-6 justify-start">
+    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1 sm:gap-4 mb-2 sm:mb-6">
       {/* Department Filter */}
       <select
-        className="p-2 border rounded-md cursor-pointer"
+        className="p-1 sm:p-2 border rounded-md cursor-pointer text-[10px] sm:text-sm"
         value={filters.dept}
         onChange={(e) => setFilters({ ...filters, dept: e.target.value })}
       >
@@ -22,14 +22,14 @@ const Filters = ({ filters, setFilters }) => {
       {/* Date Filter */}
       <input
         type="date"
-        className="p-2 border rounded-md cursor-pointer"
+        className="p-1 sm:p-2 border rounded-md cursor-pointer text-[10px] sm:text-sm"
         value={filters.date}
         onChange={(e) => setFilters({ ...filters, date: e.target.value })}
       />
 
       {/* Status Filter */}
       <select
-        className="p-2 border rounded-md cursor-pointer"
+        className="p-1 sm:p-2 border rounded-md cursor-pointer text-[10px] sm:text-sm"
         value={filters.status}
         onChange={(e) => setFilters({ ...filters, status: e.target.value })}
       >
@@ -41,7 +41,7 @@ const Filters = ({ filters, setFilters }) => {
 
       {/* Resolution Filter */}
       <select
-        className="p-2 border rounded-md cursor-pointer"
+        className="p-1 sm:p-2 border rounded-md cursor-pointer text-[10px] sm:text-sm"
         value={filters.resolution}
         onChange={(e) => setFilters({ ...filters, resolution: e.target.value })}
       >

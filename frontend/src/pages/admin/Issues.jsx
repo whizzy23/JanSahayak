@@ -72,16 +72,16 @@ const Issues = () => {
   if (error) return <p className="text-center text-red-600">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-6 pt-20 transition-all duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-1 sm:p-6 pt-12 sm:pt-20 transition-all duration-300">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold mb-8 text-center text-blue-700 drop-shadow-md">
+        <h2 className="text-xl sm:text-4xl font-bold mb-2 sm:mb-8 text-center text-blue-700 drop-shadow-md">
           All Issues
         </h2>
 
         <Filters filters={filters} setFilters={setFilters} />
 
         {filteredIssues.length === 0 ? (
-          <div className="text-center text-gray-600 mt-16 text-lg italic">
+          <div className="text-center text-gray-600 mt-4 sm:mt-16 text-sm sm:text-lg italic">
             No issues match the selected filters.
           </div>
         ) : (
