@@ -6,6 +6,7 @@ import Filters from "../../components/Issues/Filters";
 import IssuesTable from "../../components/Issues/IssuesTable";
 import IssueModal from "../../components/Issues/IssuesModal";
 import PageLoader from "../../components/Loader";
+import { ClipboardList, UserCheck, Clock, CheckCircle, XCircle, Archive } from 'lucide-react';
 
 const Issues = () => {
   const [issues, setIssues] = useState([]);
@@ -68,15 +69,67 @@ const Issues = () => {
       return (urgencyPriority[a.urgency] ?? 99) - (urgencyPriority[b.urgency] ?? 99);
     });
 
+  // Calculate statistics
+  const stats = {
+    total: issues.length,
+    assigned: issues.filter(i => i.status === 'Assigned').length,
+    pending: issues.filter(i => i.status === 'Pending').length,
+    resolved: issues.filter(i => i.resolution === 'Resolved').length,
+    unresolved: issues.filter(i => i.resolution === 'Unresolved').length,
+    closed: issues.filter(i => i.status === 'Closed').length
+  };
+
   if (loading) return <PageLoader />;
   if (error) return <p className="text-center text-red-600">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-1 sm:p-6 pt-12 sm:pt-20 transition-all duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-4 sm:p-6 mt-16">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-xl sm:text-4xl font-bold mb-2 sm:mb-8 text-center text-blue-700 drop-shadow-md">
-          All Issues
-        </h2>
+        <div className="flex justify-between items-center mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-900">
+            All Issues
+          </h2>
+        </div>
+
+        {/* Statistics Overview */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <StatCard
+            title="Total Issues"
+            value={stats.total}
+            icon={<ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />}
+            className="bg-gradient-to-br from-slate-50 to-white hover:from-slate-100 hover:to-slate-50"
+          />
+          <StatCard
+            title="Assigned Issues"
+            value={stats.assigned}
+            icon={<UserCheck className="w-5 h-5 sm:w-6 sm:h-6" />}
+            className="bg-gradient-to-br from-cyan-50 to-white hover:from-cyan-100 hover:to-cyan-50"
+          />
+          <StatCard
+            title="Pending Issues"
+            value={stats.pending}
+            icon={<Clock className="w-5 h-5 sm:w-6 sm:h-6" />}
+            className="bg-gradient-to-br from-yellow-50 to-white hover:from-yellow-100 hover:to-yellow-50"
+          />
+          <StatCard
+            title="Resolved Issues"
+            value={stats.resolved}
+            icon={<CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
+            className="bg-gradient-to-br from-green-50 to-white hover:from-green-100 hover:to-green-50"
+          />
+          <StatCard
+            title="Unresolved Issues"
+            value={stats.unresolved}
+            icon={<XCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
+            className="bg-gradient-to-br from-red-50 to-white hover:from-red-100 hover:to-red-50"
+          />
+          <StatCard
+            title="Closed Issues"
+            value={stats.closed}
+            icon={<Archive className="w-5 h-5 sm:w-6 sm:h-6" />}
+            className="bg-gradient-to-br from-purple-50 to-white hover:from-purple-100 hover:to-purple-50"
+          />
+        </section>
 
         <Filters filters={filters} setFilters={setFilters} />
 
@@ -100,5 +153,22 @@ const Issues = () => {
     </div>
   );
 };
+
+// StatCard component
+function StatCard({ title, value, icon, className }) {
+  return (
+    <div className={`${className} p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg transition-all duration-300 transform hover:scale-105`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-600 text-sm font-medium">{title}</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+        </div>
+        <div className="p-3 bg-white/50 rounded-xl">
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default Issues;
