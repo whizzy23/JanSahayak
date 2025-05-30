@@ -33,18 +33,16 @@ const CustomTooltip = ({ active, payload }) => {
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
-  // Calculate the position on the pie chart
+  if (percent < 0.03) return null; // Skip tiny labels
+
+  const RADIAN = Math.PI / 180;
   const pieX = cx + (outerRadius + 10) * Math.cos(-midAngle * RADIAN);
   const pieY = cy + (outerRadius + 10) * Math.sin(-midAngle * RADIAN);
-  
-  // Calculate the end position (closer to the pie)
-  const radius = outerRadius + 60; // Reduced distance from 120 to 60
+  const radius = outerRadius + 90;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  // Calculate control points for the curve (reduced curve)
-  const controlX = (pieX + x) / 2 + (Math.random() * 20 - 10); // Reduced random curve
-  const controlY = (pieY + y) / 2 + (Math.random() * 20 - 10);
+  const controlX = (pieX + x) / 2;
+  const controlY = (pieY + y) / 2;
 
   return (
     <g>
@@ -54,19 +52,14 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
         strokeWidth={2}
         fill="none"
         className="transition-all duration-300"
-        style={{
-          filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))'
-        }}
+        style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))' }}
       />
       <circle
         cx={x}
         cy={y}
         r={4}
         fill={COLORS[index % COLORS.length]}
-        className="transition-all duration-300"
-        style={{
-          filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))'
-        }}
+        style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1))' }}
       />
       <text
         x={x + (x > cx ? 10 : -10)}
@@ -74,15 +67,14 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
         className="text-xs font-medium fill-blue-900"
-        style={{
-          filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1))'
-        }}
+        style={{ filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1))' }}
       >
         {name}
       </text>
     </g>
   );
 };
+
 
 export default function PieChart({ data }) {
   const safeData = Array.isArray(data)

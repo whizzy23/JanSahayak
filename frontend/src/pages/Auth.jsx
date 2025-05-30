@@ -76,6 +76,19 @@ const Auth = ({ onAuthSuccess }) => {
             </motion.div>
           )}
 
+          {/* Test credentials note (only shown in login mode) */}
+          {isLogin && (
+            <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg mb-6">
+              <p className="font-semibold mb-2">For testing use:</p>
+              <ul className="list-disc list-inside text-sm space-y-1">
+                <li><strong>Admin ID:</strong> admin123@gmail.com</li>
+                <li><strong>Admin Password:</strong> admin123</li>
+                <li><strong>Employee ID:</strong> employee123@gmail.com</li>
+                <li><strong>Employee Password:</strong> employee123</li>
+              </ul>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <>
