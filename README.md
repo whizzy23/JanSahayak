@@ -86,7 +86,7 @@ npm run dev
 Create a `.env` file:
 
 ```
-VITE_API_BASE_URL=http://localhost:5500
+VITE_API_BASE_URL=http://localhost:7000
 ```
 
 ### Backend
@@ -101,7 +101,7 @@ npm start
 Create a `.env` file:
 
 ```
-PORT=5500
+PORT=7000
 MONGO_URI=your_mongo_connection
 JWT_SECRET=your_jwt_secret
 TWILIO_ACCOUNT_SID=your_twilio_sid
@@ -109,6 +109,15 @@ TWILIO_AUTH_TOKEN=your_twilio_token
 ```
 
 ### WhatsApp Chatbot (NLP + Flask)
+
+Create a `.env` file:
+
+```
+PORT=5000
+MONGO_URI=your_mongo_connection
+FLASK_URL=http://localhost:6000
+FLASK_PORT=6000
+```
 
 Navigate to the chatbot services and run:
 
@@ -119,15 +128,13 @@ python -m spacy download en_core_web_md
 python app.py
 ```
 
-Ensure the Flask service is running on port 5000.
-
 ## Webhook Setup
 
 1. Start the backend server (`npm start` in backend directory).
 2. Use localtunnel to expose port 5500:
 
 ```bash
-npx localtunnel --port 5500
+npx localtunnel --port 6000
 ```
 
 3. Copy the generated URL and set it as your webhook in Twilio:
@@ -139,5 +146,10 @@ npx localtunnel --port 5500
 4. In Twilio Console, go to Messaging > Settings > WhatsApp Sandbox Settings and paste the webhook URL.
 
 ## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+## Contributors
+
+- Pitamber Paudel
+- Aditya Raj
+- Ayushman Jaiswal
