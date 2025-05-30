@@ -3,7 +3,6 @@ const User = require('../models/User');
 
 // Signup controller
 const signup = async (req, res) => {
-  console.log("Body", req.body)
   try {
     const { name, email, password, role, department } = req.body;
 
@@ -87,12 +86,10 @@ const login = async (req, res) => {
 // Get all users (admin only)
 const getAllUsers = async (req, res) => {
   try {
-    console.log('Getting all users...');
     const users = await User.find()
       .select('-password') // Exclude password from response
       .sort({ createdAt: -1 });
     
-    console.log('Found users:', users.length);
     res.json(users);
   } catch (error) {
     console.error('Error in getAllUsers:', error);
@@ -104,22 +101,18 @@ const getAllUsers = async (req, res) => {
 const verifyUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log('Verifying user:', userId);
     
     const user = await User.findById(userId);
     if (!user) {
-      console.log('User not found:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
     if (user.isVerified) {
-      console.log('User already verified:', userId);
       return res.status(400).json({ error: 'User is already verified' });
     }
 
     user.isVerified = true;
     await user.save();
-    console.log('User verified successfully:', userId);
 
     res.json({ message: 'User verified successfully', email: user.email });
   } catch (error) {
@@ -132,11 +125,9 @@ const verifyUser = async (req, res) => {
 const removeUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log('Removing user:', userId);
     
     const user = await User.findById(userId);
     if (!user) {
-      console.log('User not found:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -144,13 +135,11 @@ const removeUser = async (req, res) => {
     if (user.role === 'admin') {
       const adminCount = await User.countDocuments({ role: 'admin' });
       if (adminCount <= 1) {
-        console.log('Cannot remove last admin');
         return res.status(400).json({ error: 'Cannot remove the last admin user' });
       }
     }
 
     await user.deleteOne();
-    console.log('User removed successfully:', userId);
 
     res.json({ message: 'User removed successfully' });
   } catch (error) {
@@ -211,12 +200,10 @@ const createUser = async (req, res) => {
 // Get all employees (excluding admins)
 const getAllEmployees = async (req, res) => {
   try {
-    console.log('Fetching all employees...');
     const employees = await User.find({ role: 'employee' })
       .select('-password') // Exclude password from the response
       .sort({ createdAt: -1 }); // Sort by newest first
     
-    console.log(`Found ${employees.length} employees`);
     res.json(employees);
   } catch (error) {
     console.error('Error fetching employees:', error);
@@ -228,17 +215,14 @@ const getAllEmployees = async (req, res) => {
 const getEmployeeById = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('Fetching employee with ID:', id);
 
     const employee = await User.findOne({ _id: id, role: 'employee' })
       .select('-password'); // Exclude password from the response
 
     if (!employee) {
-      console.log('Employee not found');
       return res.status(404).json({ message: 'Employee not found' });
     }
 
-    console.log('Employee found:', employee.email);
     res.json(employee);
   } catch (error) {
     console.error('Error fetching employee:', error);
@@ -259,8 +243,6 @@ const searchEmployees = async (req, res) => {
       startDate,
       endDate
     } = req.query;
-
-    console.log('Searching employees with criteria:', req.query);
 
     // Build search query
     const query = { role: 'employee' };
@@ -296,7 +278,6 @@ const searchEmployees = async (req, res) => {
       .select('-password')
       .sort({ createdAt: -1 });
 
-    console.log(`Found ${employees.length} employees matching search criteria`);
     res.json(employees);
   } catch (error) {
     console.error('Error searching employees:', error);
@@ -308,17 +289,14 @@ const searchEmployees = async (req, res) => {
 const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
-    console.log('Fetching profile for user ID:', userId);
 
     const user = await User.findById(userId)
       .select('-password'); // Exclude password from the response
 
     if (!user) {
-      console.log('User not found');
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log('Profile found for:', user.email);
     res.json(user);
   } catch (error) {
     console.error('Error fetching profile:', error);

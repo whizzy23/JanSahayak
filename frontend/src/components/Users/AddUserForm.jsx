@@ -39,7 +39,6 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
 
     try {
       await authService.createUser(formData);
-      console.log(formData)
       onSuccess();
     } catch (err) {
       setError(err.message || "Failed to create user");

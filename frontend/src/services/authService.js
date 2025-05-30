@@ -146,13 +146,11 @@ export const authService = {
         throw new Error('No authentication token found');
       }
 
-      console.log('Sending verify request for user:', userId);
       const response = await api.post(`/auth/verify-user/${userId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('Verify response:', response.data);
       return response.data;
     } catch (error) {
       console.error('verifyUser error:', error.response || error);
@@ -168,13 +166,11 @@ export const authService = {
         throw new Error('No authentication token found');
       }
 
-      console.log('Sending remove request for user:', userId);
       const response = await api.delete(`/auth/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('Remove response:', response.data);
       return response.data;
     } catch (error) {
       console.error('removeUser error:', error.response || error);
@@ -212,13 +208,11 @@ export const authService = {
         throw new Error('No authentication token found');
       }
 
-      console.log('Creating new user:', userData);
       const response = await api.post('/auth/users', userData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('Create user response:', response.data);
       return response.data;
     } catch (error) {
       console.error('createUser error:', error.response || error);
