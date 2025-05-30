@@ -197,7 +197,7 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
             </div>
 
             {/* Description, Comments + Image side by side */}
-            <div className="flex gap-10">
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-10">
               <div className="flex-1 space-y-6">
                 <div>
                   <strong>Description:</strong>
@@ -214,7 +214,7 @@ const IssueModal = ({ issue, onClose, setIssues, userRole }) => {
                 </div>
               </div>
 
-              <div className="w-64 flex-shrink-0 rounded-lg overflow-hidden shadow-md border border-gray-200">
+              <div className="w-full sm:w-64 flex-shrink-0 rounded-lg overflow-hidden shadow-md border border-gray-200">
                 <strong className="block px-3 pt-2 text-gray-600">Image</strong>
                 <div className="p-3">
                   {currentIssue.imageUrl ? (
